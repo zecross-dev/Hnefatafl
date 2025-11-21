@@ -52,9 +52,9 @@
 #include <iostream>
 #include <sstream>
 
-#include "typeDef.h"
-#include "functions.h"
-#include "tests.h"
+#include "../Headers/typeDef.h"
+#include "../Headers/functions.h"
+#include "../Headers/tests.h"
 
 #include <functional>
 

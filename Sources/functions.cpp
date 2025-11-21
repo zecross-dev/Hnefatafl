@@ -11,8 +11,8 @@
  */
 
 #include <iostream>
-#include "typeDef.h"
-#include "functions.h"
+#include "../Headers/typeDef.h"
+#include "../Headers/functions.h"
 
 
 #ifdef _WIN32
@@ -131,7 +131,7 @@ void displayHnefataflLogo() {
     cout << "|      ■■       ■■     ■■■     ■■■    ■■■             ■■■            ■■■   ■■■           ■■■            ■■■   ■■■         ■■■               ■■■             |" << endl;
     cout << "|      ■■■     ■■■      ■■■     ■■■   ■■■             ■■■           ■■■    ■■■            ■■■          ■■■    ■■■         ■■■              ■■■              |" << endl;
     cout << "|     ■■■■■   ■■■■■     ■■■     ■■■   ■■■■           ■■■■          ■■■     ■■■  ■■        ■■■         ■■■     ■■■  ■■    ■■■■              ■■■              |" << endl;
-    cout << "|    ■■■■■■■■■■■■■■     ■■■     ■■■  ■■■■■■ ■■      ■■■■■■ ■■     ■■■■■   ■■■■■■ ■■      ■■■         ■■■■■   ■■■■■■ ■   ■■■■■■ ■■         ■■■               |" << endl;
+    cout << "|    ■■■■■■■■■■■■■■     ■■■     ■■■  ■■■■■■ ■■      ■■■■■■ ■■     ■■■■■   ■■■■■■ ■■      ■■■         ■■■■■   ■■■■■■ ■■   ■■■■■■ ■■         ■■■              |" << endl;
     cout << "|      ■■■■   ■■■■      ■■■     ■■■   ■■■             ■■■         ■■■  ■■■■  ■■■        ■■■          ■■■  ■■■■  ■■■       ■■■            ■■■                |" << endl;
     cout << "|       ■■     ■■      ■■■     ■■■    ■■■             ■■■         ■■■      ■■■         ■■■           ■■■        ■■■       ■■■          ■■■                  |" << endl;
     cout << "|      ■■■     ■■■     ■■■     ■■■    ■■■      ■      ■■■         ■■■      ■■■          ■■■          ■■■      ■■■         ■■■        ■■■                    |" << endl;
@@ -182,11 +182,22 @@ bool chooseSizeBoard(BoardSize& aBoardSize)
  * @param aBoard Reference to the Board object (`itsSize` must be set).
  * @return `true` if successful, `false` on allocation failure or invalid input.
  */
-bool createBoard(Board& aBoard) {
-    // TODO: Implement dynamic board allocation
+bool createBoard(Board& aBoard)
+{
+    const int SIZE = aBoard.itsSize;
 
-    return false;
+    // Allocation of the boards lines
+    aBoard.itsCells = new Cell*[SIZE];
+
+    // Allocation of Columns for each line
+    for (int line = 0; line < SIZE; line++)
+    {
+        aBoard.itsCells[line] = new Cell[SIZE];
+    }
+
+    return true;
 }
+
 
 /**
  * @brief Frees the memory allocated for the game board.

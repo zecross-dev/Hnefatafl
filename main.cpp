@@ -11,9 +11,9 @@
  */
 
 #include <iostream>
-#include "typeDef.h"
-#include "functions.h"
-#include "tests.h"
+#include "Headers/typeDef.h"
+#include "Headers/functions.h"
+#include "Headers/tests.h"
 
 using namespace std;
 
@@ -26,10 +26,13 @@ void playGame()
 {
     displayHnefataflLogo();
     BoardSize gameBoardSize;
+    Board gameBoard;
     bool validationSize = false;
     while ( validationSize ==false ) {
          validationSize=chooseSizeBoard(gameBoardSize);
     }
+    gameBoard.itsSize = gameBoardSize;
+    createBoard(gameBoard);
     // Hint: Create a Game structure, configure terminal, get players, create board,
     // run game loop until finished, display winner, and clean up memory
 }
