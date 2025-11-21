@@ -194,7 +194,6 @@ bool createBoard(Board& aBoard)
     {
         aBoard.itsCells[line] = new Cell[SIZE];
     }
-
     return true;
 }
 
@@ -208,7 +207,16 @@ bool createBoard(Board& aBoard)
  * @param aBoard Reference to the Board object to deallocate.
  */
 void deleteBoard(Board& aBoard) {
-    // TODO: Implement board deallocation
+    const int SIZE = aBoard.itsSize;
+
+    for (int line = 0; line < SIZE; line++) {
+        //free each row of the table
+        delete aBoard.itsCells[line] ;
+        aBoard.itsCells[line] = nullptr;
+    }
+    //free all the table
+    delete aBoard.itsCells ;
+    aBoard.itsCells = nullptr;
 }
 
 /**
