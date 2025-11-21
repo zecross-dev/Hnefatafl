@@ -211,11 +211,11 @@ void deleteBoard(Board& aBoard) {
 
     for (int line = 0; line < SIZE; line++) {
         //free each row of the table
-        delete aBoard.itsCells[line] ;
+        delete[] aBoard.itsCells[line] ;
         aBoard.itsCells[line] = nullptr;
     }
     //free all the table
-    delete aBoard.itsCells ;
+    delete[] aBoard.itsCells ;
     aBoard.itsCells = nullptr;
 }
 
