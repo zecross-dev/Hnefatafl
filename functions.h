@@ -1,5 +1,5 @@
 /**
- * @file fonctions.h
+ * @file functions.h
  *
  * @brief Declarations of functions for the Hnefatafl game.
  *

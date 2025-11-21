@@ -122,8 +122,23 @@ bool clearConsole() {
  * @note Uses UTF-8 block characters. Call `enableTerminalFormatting()` first for proper Windows display.
  */
 void displayHnefataflLogo() {
-    // TODO: Implement logo display
-}
+    clearConsole();
+    cout << "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾" << endl;
+    cout << "|     ■           ■                                                                ■■■■■■  ■■■■■■                                                           |" << endl;
+    cout << "|      ■■       ■■     ■■             ■■■■■■■■■       ■■■■■■■■■■      ■■■       ■■■■   ■■■■■■   ■■■■     ■■■              ■■■■■■■■■       ■■■■■             |" << endl;
+    cout << "|      ■■■     ■■■     ■■■■■■■■■       ■■■■    ■■      ■■■      ■■    ■■■■■   ■■        ■■■        ■■    ■■■■■             ■■■      ■■      ■■■             |" << endl;
+    cout << "|      ■■       ■■     ■■■■   ■■■    ■■■      ■      ■■■       ■     ■■■  ■■■            ■■■            ■■■  ■■■         ■■■       ■        ■■■             |" << endl;
+    cout << "|      ■■       ■■     ■■■     ■■■    ■■■             ■■■            ■■■   ■■■           ■■■            ■■■   ■■■         ■■■               ■■■             |" << endl;
+    cout << "|      ■■■     ■■■      ■■■     ■■■   ■■■             ■■■           ■■■    ■■■            ■■■          ■■■    ■■■         ■■■              ■■■              |" << endl;
+    cout << "|     ■■■■■   ■■■■■     ■■■     ■■■   ■■■■           ■■■■          ■■■     ■■■  ■■        ■■■         ■■■     ■■■  ■■    ■■■■              ■■■              |" << endl;
+    cout << "|    ■■■■■■■■■■■■■■     ■■■     ■■■  ■■■■■■ ■■      ■■■■■■ ■■     ■■■■■   ■■■■■■ ■■      ■■■         ■■■■■   ■■■■■■ ■   ■■■■■■ ■■         ■■■               |" << endl;
+    cout << "|      ■■■■   ■■■■      ■■■     ■■■   ■■■             ■■■         ■■■  ■■■■  ■■■        ■■■          ■■■  ■■■■  ■■■       ■■■            ■■■                |" << endl;
+    cout << "|       ■■     ■■      ■■■     ■■■    ■■■             ■■■         ■■■      ■■■         ■■■           ■■■        ■■■       ■■■          ■■■                  |" << endl;
+    cout << "|      ■■■     ■■■     ■■■     ■■■    ■■■      ■      ■■■         ■■■      ■■■          ■■■          ■■■      ■■■         ■■■        ■■■                    |" << endl;
+    cout << "|      ■■       ■■     ■■     ■■      ■■■     ■■      ■■■         ■■■      ■■■       ■   ■■■  ■      ■■■      ■■■         ■■■       ■■■               ■■■   |" << endl;
+    cout << "|     ■           ■    ■     ■      ■■■■■■■■■■■     ■■■■■           ■■■      ■■■      ■■■■■■■■        ■■■      ■■■      ■■■■■        ■■■■■■■■■■■■■■■■■■     |" << endl;
+    cout << "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾" << endl;
+    }
 
 // ============================================================================
 // SECTION 2: BOARD MANAGEMENT
@@ -140,8 +155,22 @@ void displayHnefataflLogo() {
  */
 bool chooseSizeBoard(BoardSize& aBoardSize)
 {
-    // TODO: Implement board size selection
-    return false;
+    int size ;
+    cout << "Select a Board size between 11 or 13 here :  " ;
+    cin >> size ;
+    if (size == 13) {
+        cout << "You selected 13x13 board." << endl;
+        aBoardSize = BIG;
+    }
+    else if (size ==11) {
+        cout << "You selected 11x11 board." << endl;
+        aBoardSize = LITTLE;
+    }
+    else {
+        cout << "invalid size please retry." << endl;
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -155,6 +184,7 @@ bool chooseSizeBoard(BoardSize& aBoardSize)
  */
 bool createBoard(Board& aBoard) {
     // TODO: Implement dynamic board allocation
+
     return false;
 }
 

@@ -24,7 +24,12 @@ using namespace std;
  */
 void playGame()
 {
-    // TODO: Implement the complete game logic here
+    displayHnefataflLogo();
+    BoardSize gameBoardSize;
+    bool validationSize = false;
+    while ( validationSize ==false ) {
+         validationSize=chooseSizeBoard(gameBoardSize);
+    }
     // Hint: Create a Game structure, configure terminal, get players, create board,
     // run game loop until finished, display winner, and clean up memory
 }
@@ -46,7 +51,7 @@ void launchTests(){
 
     // Display test suite header
     printTestSuiteHeader();
-    
+
     // ─────────────────────────────────────────────────────────────────
     // Step 1: Board Setup and Management Tests
     // ─────────────────────────────────────────────────────────────────
@@ -80,7 +85,7 @@ void launchTests(){
     // test_isKingCapturedRecursive();  // Optional: Advanced recursive king capture detection
     test_isGameFinished();
     test_whoWon();
-    
+
     // Display test suite footer
     printTestSuiteFooter();
 }
@@ -95,12 +100,11 @@ void launchTests(){
  */
 int main() {
 
-    
+
     // Uncomment the line below to run tests
-    // launchTests();
-    cout << "Hello World";
+    // launchTests()
     // Start the game
-    //playGame();
+    playGame();
 
     return 0;
 }
