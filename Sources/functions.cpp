@@ -6,18 +6,20 @@
  * This file contains the implementation of various functions used in the Hnefatafl game, including
  * board initialization, display, piece movement, capturing, and game state checks.
  *
- * @author JMB - IUT Informatique La Rochelle
+ * @author JMB and zecross-dev - IUT Informatique La Rochelle
  * @date 10/11/2025
  */
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #include <iostream>
 #include "../Headers/typeDef.h"
 #include "../Headers/functions.h"
 
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
+
+
 
 using namespace std;
 
@@ -229,7 +231,27 @@ void deleteBoard(Board& aBoard) {
  * @note Handles both LITTLE (11x11) and BIG (13x13) board sizes.
  */
 void displayBoard(const Board& aBoard) {
-    // TODO: Implement board display
+    const int SIZE = aBoard.itsSize;
+    const string CHARBOARD = "ABCDEFGHIJKLM";
+    if (SIZE == 11) {
+        cout << " X |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  10 |  11 |" << endl
+             << "   +─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+" << endl;
+        for (int i = 0 ; i<SIZE ; i++) {
+            cout << " " << CHARBOARD[i]
+            <<   " |  d  |  M  |     |     |     |     |     |     |     |     |     |" << endl
+            << "   +─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+" << endl;
+        }
+    }
+    else if (SIZE == 13) {
+        cout << " X |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  10 |  11 |  12 |  13 |" << endl
+             << "   +─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+" << endl;
+        for (int i = 0 ; i<SIZE ; i++) {
+            cout << " " << CHARBOARD[i]
+            <<   " |  d  |  M  |     |     |     |     |     |     |     |     |     |     |     |" << endl
+            << "   +─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+" << endl;
+        }
+    }
+
 }
 
 /**

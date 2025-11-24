@@ -25,14 +25,20 @@ using namespace std;
 void playGame()
 {
     displayHnefataflLogo();
+    //size initialisation
     BoardSize gameBoardSize;
+    //board initialisation
     Board gameBoard;
     bool validationSize = false;
+    //Select valid size
     while ( validationSize ==false ) {
          validationSize=chooseSizeBoard(gameBoardSize);
     }
     gameBoard.itsSize = gameBoardSize;
     createBoard(gameBoard);
+    clearConsole();
+    displayHnefataflLogo();
+    displayBoard(gameBoard);
     // Hint: Create a Game structure, configure terminal, get players, create board,
     // run game loop until finished, display winner, and clean up memory
 }
