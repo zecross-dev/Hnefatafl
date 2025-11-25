@@ -38,6 +38,7 @@ void playGame()
     createBoard(gameBoard);
     clearConsole();
     displayHnefataflLogo();
+    initializeBoard(gameBoard);
     displayBoard(gameBoard);
     // Hint: Create a Game structure, configure terminal, get players, create board,
     // run game loop until finished, display winner, and clean up memory

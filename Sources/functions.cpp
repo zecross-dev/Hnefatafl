@@ -9,6 +9,8 @@
  * @author JMB and zecross-dev - IUT Informatique La Rochelle
  * @date 10/11/2025
  */
+#include <complex.h>
+#include <bits/types/sigevent_t.h>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -16,10 +18,6 @@
 #include <iostream>
 #include "../Headers/typeDef.h"
 #include "../Headers/functions.h"
-
-
-
-
 
 using namespace std;
 
@@ -233,25 +231,52 @@ void deleteBoard(Board& aBoard) {
 void displayBoard(const Board& aBoard) {
     const int SIZE = aBoard.itsSize;
     const string CHARBOARD = "ABCDEFGHIJKLM";
-    if (SIZE == 11) {
-        cout << " X |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  10 |  11 |" << endl
-             << "   +─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+" << endl;
-        for (int i = 0 ; i<SIZE ; i++) {
-            cout << " " << CHARBOARD[i]
-            <<   " |  d  |  M  |     |     |     |     |     |     |     |     |     |" << endl
-            << "   +─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+" << endl;
-        }
+    cout << "   |";
+    for (int column = 0 ; column<SIZE ; column++ ) {
+        cout << "  " << column +1 << "  |";
     }
-    else if (SIZE == 13) {
-        cout << " X |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  10 |  11 |  12 |  13 |" << endl
-             << "   +─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+" << endl;
-        for (int i = 0 ; i<SIZE ; i++) {
-            cout << " " << CHARBOARD[i]
-            <<   " |  d  |  M  |     |     |     |     |     |     |     |     |     |     |     |" << endl
-            << "   +─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+─────+" << endl;
-        }
+    cout <<endl;
+    cout<<"   +";
+    for (int column = 0 ; column<SIZE ; column++ ) {
+        cout << "─────+";
     }
+    cout <<endl;
+    for (int line = 0 ; line<SIZE ; line++) {
+        cout << " " << CHARBOARD[line] << " |";
+        for (int column = 0 ; column<SIZE ; column++) {
+            //take the enums as integers
+            CellType pos = aBoard.itsCells[line][column].itsCellType;
+            PieceType piece = aBoard.itsCells[line][column].itsPieceType;
+            cout << "  ";
+            if (piece == NONE ) {
 
+                if (pos == NORMAL) {
+                    cout << " ";
+                }
+                else if (pos == CASTLE) {
+                    cout << "🏰";
+                }
+                else if (pos == FORTRESS) {
+                    cout << "♜";
+                }
+            }
+            else if (piece == KING) {
+                cout << "♕";
+            }
+            else if (piece == SHIELD) {
+                cout << "♦";
+            }
+            else if (piece == SWORD) {
+                cout <<"⚔";
+            }
+            cout << "  |";
+        }
+        cout<< endl << "   +";
+        for (int column = 0 ; column<SIZE ; column++ ) {
+            cout << "─────+";
+        }
+        cout << endl;
+    }
 }
 
 /**
@@ -263,9 +288,60 @@ void displayBoard(const Board& aBoard) {
  * @param aBoard The board object to initialize (`itsCells` must be allocated, `itsSize` must be set).
  * @note Adjusts piece positions for LITTLE (11x11) vs BIG (13x13) boards.
  */
-void initializeBoard(Board& aBoard)
-{
-    // TODO: Implement board initialization with starting positions
+void initializeBoard(Board& aBoard) {
+    const int SIZE = aBoard .itsSize;
+    const int BIG_CENTER = 6 , LITTLE_CENTER = 5;
+    //set cellType and set piece to NONE
+    for (int line = 0 ; line < SIZE ; line++) {
+        for (int column = 0 ; column < SIZE ; column++) {
+            //set castle and king in center
+            if (line == LITTLE_CENTER && column == LITTLE_CENTER) {
+                aBoard.itsCells[line][column].itsCellType  = CASTLE;
+                aBoard.itsCells[line][column].itsPieceType = KING;
+            }
+            //set fortress in corners
+            else if ((line == 0 || line == SIZE-1 ) && (column== 0 || column == SIZE-1 )){
+                aBoard.itsCells[line][column].itsCellType  = FORTRESS;
+                aBoard.itsCells[line][column].itsPieceType = NONE;
+            }
+            //set all the other pieces at normal case and none piece
+            else {
+                aBoard.itsCells[line][column].itsCellType  = NORMAL;
+                aBoard.itsCells[line][column].itsPieceType = NONE;
+            }
+        }
+    }
+    //set all the piece type
+    if (SIZE == 11) {
+        for (int line = 0 ; line < SIZE ; line++) {
+            for (int column = 0 ; column < SIZE; column++) {
+                if (line == LITTLE_CENTER && column != LITTLE_CENTER && column >= LITTLE_CENTER-2 && column <= LITTLE_CENTER+2) {
+                    aBoard.itsCells[line][column].itsPieceType = SHIELD;
+                    //place the invert coords pieces
+                    aBoard.itsCells[column][line].itsPieceType = SHIELD;
+                }
+                if ((line == LITTLE_CENTER-1 || line == LITTLE_CENTER +1) && (column == LITTLE_CENTER-1 || column == LITTLE_CENTER+1)) {
+                    aBoard.itsCells[line][column].itsPieceType = SHIELD;
+                }
+                //place the swords on the board
+                if ((line == 0 || line == SIZE -1 )&& column > 2 && column < 8) {
+                    aBoard.itsCells[line][column].itsPieceType = SWORD;
+                    aBoard.itsCells[column][line].itsPieceType = SWORD;
+                }
+
+                if (line == LITTLE_CENTER && (column == 1 || column == 9)) {
+                    aBoard.itsCells[line][column].itsPieceType = SWORD;
+                    aBoard.itsCells[column][line].itsPieceType = SWORD;
+                }
+            }
+        }
+
+
+
+    }
+    else if (SIZE == 13) {
+
+    }
 }
 
 // ============================================================================
