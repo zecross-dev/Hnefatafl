@@ -31,11 +31,15 @@ void playGame()
     Board gameBoard;
     bool validationSize = false;
     //Select valid size
-    while ( validationSize ==false ) {
+    while ( validationSize == false ) {
          validationSize=chooseSizeBoard(gameBoardSize);
     }
     gameBoard.itsSize = gameBoardSize;
-    createBoard(gameBoard);
+    bool validBoard;
+    do {
+        validBoard = createBoard(gameBoard);
+    }while (validBoard != true);
+
     clearConsole();
     displayHnefataflLogo();
     initializeBoard(gameBoard);
@@ -112,7 +116,7 @@ int main() {
 
 
     // Uncomment the line below to run tests
-    // launchTests()
+    launchTests();
     // Start the game
     playGame();
 

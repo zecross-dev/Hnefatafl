@@ -9,8 +9,7 @@
  * @author JMB and zecross-dev - IUT Informatique La Rochelle
  * @date 10/11/2025
  */
-#include <complex.h>
-#include <bits/types/sigevent_t.h>
+#include <complex>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -185,14 +184,19 @@ bool chooseSizeBoard(BoardSize& aBoardSize)
 bool createBoard(Board& aBoard)
 {
     const int SIZE = aBoard.itsSize;
-
-    // Allocation of the boards lines
+    // dont do if size is null
+    if ( SIZE == 0 ) {
+        return false;
+    }
+    // prevent double allocation
+    if (aBoard.itsCells != nullptr) {
+        return false;
+    }
+    // allocation of the boards lines
     aBoard.itsCells = new Cell*[SIZE];
-
-    // Allocation of Columns for each line
-    for (int line = 0; line < SIZE; line++)
-    {
-        aBoard.itsCells[line] = new Cell[SIZE];
+    // allocation of Columns for each line
+    for (int line = 0; line < SIZE; line++){
+            aBoard.itsCells[line] = new Cell[SIZE];
     }
     return true;
 }
@@ -211,12 +215,17 @@ void deleteBoard(Board& aBoard) {
 
     for (int line = 0; line < SIZE; line++) {
         //free each row of the table
-        delete[] aBoard.itsCells[line] ;
-        aBoard.itsCells[line] = nullptr;
+        if (aBoard.itsCells != nullptr) {
+            delete[] aBoard.itsCells[line] ;
+            aBoard.itsCells[line] = nullptr;
+        }
+
     }
     //free all the table
-    delete[] aBoard.itsCells ;
-    aBoard.itsCells = nullptr;
+    if (aBoard.itsCells != nullptr) {
+        delete[] aBoard.itsCells ;
+        aBoard.itsCells = nullptr;
+    }
 }
 
 /**
@@ -233,7 +242,13 @@ void displayBoard(const Board& aBoard) {
     const string CHARBOARD = "ABCDEFGHIJKLM";
     cout << "   |";
     for (int column = 0 ; column<SIZE ; column++ ) {
-        cout << "  " << column +1 << "  |";
+        cout << "  " << column +1 ;
+        if (column>=9) {
+            cout <<" |";
+        }
+        else {
+            cout <<"  |";
+        }
     }
     cout <<endl;
     cout<<"   +";
@@ -295,7 +310,7 @@ void initializeBoard(Board& aBoard) {
     for (int line = 0 ; line < SIZE ; line++) {
         for (int column = 0 ; column < SIZE ; column++) {
             //set castle and king in center
-            if (line == LITTLE_CENTER && column == LITTLE_CENTER) {
+            if (line == SIZE/2 && column == SIZE/2) {
                 aBoard.itsCells[line][column].itsCellType  = CASTLE;
                 aBoard.itsCells[line][column].itsPieceType = KING;
             }
@@ -312,17 +327,24 @@ void initializeBoard(Board& aBoard) {
         }
     }
     //set all the piece type
+    //test the size before the loop (checking one time)
     if (SIZE == 11) {
         for (int line = 0 ; line < SIZE ; line++) {
             for (int column = 0 ; column < SIZE; column++) {
+
+                //place the shields around the king
                 if (line == LITTLE_CENTER && column != LITTLE_CENTER && column >= LITTLE_CENTER-2 && column <= LITTLE_CENTER+2) {
                     aBoard.itsCells[line][column].itsPieceType = SHIELD;
-                    //place the invert coords pieces
+                    //place the invert coords pieces for optimisation
                     aBoard.itsCells[column][line].itsPieceType = SHIELD;
                 }
+                //place shields on the diagonals of the king
                 if ((line == LITTLE_CENTER-1 || line == LITTLE_CENTER +1) && (column == LITTLE_CENTER-1 || column == LITTLE_CENTER+1)) {
                     aBoard.itsCells[line][column].itsPieceType = SHIELD;
                 }
+
+
+
                 //place the swords on the board
                 if ((line == 0 || line == SIZE -1 )&& column > 2 && column < 8) {
                     aBoard.itsCells[line][column].itsPieceType = SWORD;
@@ -340,7 +362,29 @@ void initializeBoard(Board& aBoard) {
 
     }
     else if (SIZE == 13) {
+        for (int line = 0 ; line < SIZE ; line++) {
+            for (int column = 0 ; column < SIZE; column++) {
+                //place the shields around the king
+                if (line == BIG_CENTER && column != BIG_CENTER && column >= BIG_CENTER-3 && column <= BIG_CENTER+3) {
+                    aBoard.itsCells[line][column].itsPieceType = SHIELD;
+                    //place the invert coords pieces for optimisation
+                    aBoard.itsCells[column][line].itsPieceType = SHIELD;
+                }
 
+
+                //place the swords on the board
+                if ((line == 0 || line == SIZE -1 )&& column > 3 && column < 9) {
+                    aBoard.itsCells[line][column].itsPieceType = SWORD;
+                    aBoard.itsCells[column][line].itsPieceType = SWORD;
+                }
+
+                if (line == BIG_CENTER && (column == 1 || column == 11)) {
+                    aBoard.itsCells[line][column].itsPieceType = SWORD;
+                    aBoard.itsCells[column][line].itsPieceType = SWORD;
+                }
+
+            }
+        }
     }
 }
 
