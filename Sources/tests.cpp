@@ -51,14 +51,41 @@
 
 #include <iostream>
 #include <sstream>
+#include <functional>
+
+using namespace std;
 
 #include "../Headers/typeDef.h"
 #include "../Headers/functions.h"
 #include "../Headers/tests.h"
 
-#include <functional>
+// ========================= HELPER MACRO FOR SAFE TEST EXECUTION =========================
+/**
+ * @brief Macro to safely execute a test block with exception handling.
+ *
+ * Usage:
+ *   RUN_TEST_SAFE(testNum, description, {
+ *       // Test code here
+ *       if (condition) {
+ *           printTestResult(testNum, description, true);
+ *           pass++;
+ *       } else {
+ *           printTestResult(testNum, description, false, "expected", "actual");
+ *           failed++;
+ *       }
+ *   });
+ */
+#define RUN_TEST_SAFE(testNum, description, testBlock) \
+    try { \
+        testBlock \
+    } catch (const exception& e) { \
+        printTestException(testNum, description, e.what()); \
+        failed++; \
+    } catch (...) { \
+        printTestException(testNum, description, "Unknown exception/crash"); \
+        failed++; \
+    }
 
-using namespace std;
 
 // ========================= GLOBAL VARIABLES =========================
 // Local control of prompt display and board display in tested functions
@@ -75,8 +102,9 @@ void configureTestDisplay(bool showBoards, bool showPrompts);
 void printTestSuiteHeader();
 void printTestSuiteFooter();
 void printTestHeader(const string& testName);
-void printTestResult(int testNum, const string& description, bool passed, 
+void printTestResult(int testNum, const string& description, bool passed,
                      const string& expected = "", const string& actual = "");
+void printTestException(int testNum, const string& description, const string& exceptionMsg);
 void printTestSummary(const string& testName, int passed, int failed);
 void resetBoard(Cell**& aBoard, const BoardSize& aBoardSize);
 Cell** cb(const BoardSize& aBoardSize);
@@ -119,7 +147,7 @@ void test_chooseSizeBoard()
         // Tests valides
         {"11\n", "Input '11' → returns true and LITTLE", "true and LITTLE", "false or wrong size", LITTLE, true, true},
         {"13\n", "Input '13' → returns true and BIG", "true and BIG", "false or wrong size", BIG, true, true},
-        
+
         // Invalid tests: incorrect sizes
         {"12\n", "Input '12' (invalid size) → returns false", "false", "true", LITTLE, false, false},
         {"0\n", "Input '0' (zero) → returns false", "false", "true", LITTLE, false, false},
@@ -127,28 +155,28 @@ void test_chooseSizeBoard()
         {"-11\n", "Input '-11' (negative) → returns false", "false", "true", LITTLE, false, false},
         {"10\n", "Input '10' (just below 11) → returns false", "false", "true", LITTLE, false, false},
         {"14\n", "Input '14' (just above 13) → returns false", "false", "true", LITTLE, false, false},
-        
+
         // Invalid tests: non-numeric inputs
         {"2d\n", "Input '2d' (non-numeric) → returns false", "false", "true", LITTLE, false, false},
         {"abc\n", "Input 'abc' (alphabetic) → returns false", "false", "true", LITTLE, false, false},
         {"a11\n", "Input 'a11' (mixed alphanumeric) → returns false", "false", "true", LITTLE, false, false},
         {"11a\n", "Input '11a' (number with letter) → returns false", "false", "true", LITTLE, false, false},
-        
+
         // Invalid tests: empty or special inputs
         {"\n", "Input empty (just Enter) → returns false", "false", "true", LITTLE, false, false},
         {"  \n", "Input spaces only → returns false", "false", "true", LITTLE, false, false},
         {"\t\n", "Input tab only → returns false", "false", "true", LITTLE, false, false},
-        
+
         // Invalid tests: floating point numbers
         {"11.5\n", "Input '11.5' (decimal) → returns false", "false", "true", LITTLE, false, false},
         {"13.0\n", "Input '13.0' (decimal) → returns false", "false", "true", LITTLE, false, false},
-        
+
         // Invalid tests: signs and prefixes
         {"+11\n", "Input '+11' (plus sign) → returns false", "false", "true", LITTLE, false, false},
         {"+13\n", "Input '+13' (plus sign) → returns false", "false", "true", LITTLE, false, false},
         {"011\n", "Input '011' (leading zero) → returns false", "false", "true", LITTLE, false, false},
         {"013\n", "Input '013' (leading zero) → returns false", "false", "true", LITTLE, false, false},
-        
+
         // Invalid tests: spaces around
         {" 11\n", "Input ' 11' (space before) → returns false", "false", "true", LITTLE, false, false},
         {"11 \n", "Input '11 ' (space after) → returns false", "false", "true", LITTLE, false, false},
@@ -205,7 +233,7 @@ void test_createBoard() {
     int testNum = 0;
 
     // === Category 1: Valid board creation ===
-    
+
     // Test 1: Create LITTLE (11x11) board
     testNum++;
     Board board1 = {nullptr, LITTLE};
@@ -216,7 +244,7 @@ void test_createBoard() {
         printTestResult(testNum, "Create LITTLE (11x11) board → allocation successful", false, "allocated", "allocation failed");
         failed++;
     }
-    
+
     // Test 2: Verify LITTLE board cells pointer is not nullptr
     testNum++;
     if (board1.itsCells != nullptr) {
@@ -226,7 +254,7 @@ void test_createBoard() {
         printTestResult(testNum, "LITTLE board cells pointer is not nullptr", false, "non-null", "nullptr");
         failed++;
     }
-    
+
     // Test 3: Verify all rows are allocated for LITTLE board
     testNum++;
     bool allRowsAllocated = true;
@@ -247,9 +275,9 @@ void test_createBoard() {
         printTestResult(testNum, "LITTLE board: all 11 rows allocated", false, "all rows allocated", "some rows nullptr");
         failed++;
     }
-    
+
     db(board1.itsCells, LITTLE);
-    
+
     // Test 4: Create BIG (13x13) board
     testNum++;
     Board board2 = {nullptr, BIG};
@@ -260,7 +288,7 @@ void test_createBoard() {
         printTestResult(testNum, "Create BIG (13x13) board → allocation successful", false, "allocated", "allocation failed");
         failed++;
     }
-    
+
     // Test 5: Verify BIG board cells pointer is not nullptr
     testNum++;
     if (board2.itsCells != nullptr) {
@@ -270,7 +298,7 @@ void test_createBoard() {
         printTestResult(testNum, "BIG board cells pointer is not nullptr", false, "non-null", "nullptr");
         failed++;
     }
-    
+
     // Test 6: Verify all rows are allocated for BIG board
     testNum++;
     allRowsAllocated = true;
@@ -291,11 +319,11 @@ void test_createBoard() {
         printTestResult(testNum, "BIG board: all 13 rows allocated", false, "all rows allocated", "some rows nullptr");
         failed++;
     }
-    
+
     db(board2.itsCells, BIG);
-    
+
     // === Category 2: Edge cases ===
-    
+
     // Test 7: Size 0 (edge case - should be rejected)
     testNum++;
     Board board3 = {nullptr, static_cast<BoardSize>(0)};
@@ -311,7 +339,7 @@ void test_createBoard() {
             delete[] board3.itsCells; // Clean up if somehow allocated
         }
     }
-    
+
     // Test 8: Very large size (edge case - tests memory handling)
     testNum++;
     Board board4 = {nullptr, static_cast<BoardSize>(1000)};
@@ -325,9 +353,9 @@ void test_createBoard() {
         printTestResult(testNum, "Size 1000 → allocation handled", false, "allocated or failed gracefully", "unexpected behavior");
         failed++;
     }
-    
+
     // === Category 3: Double allocation (memory leak detection) ===
-    
+
     // Test 9: Double allocation prevention
     testNum++;
     Board board5 = {nullptr, LITTLE};
@@ -366,7 +394,7 @@ void test_deleteBoard() {
         std::string description;
         BoardSize size;
     };
-    
+
     TestCase tests[] = {
         {"Delete LITTLE board → pointer set to nullptr", LITTLE},
         {"Delete BIG board → pointer set to nullptr", BIG}
@@ -386,7 +414,7 @@ void test_deleteBoard() {
                 printTestResult(testNum, tests[i].description, false, "nullptr", "non-null pointer");
                 failed++;
             }
-            
+
             // Additional test: double deletion (should be safe)
             testNum++;
             deleteBoard(board); // Call on already deleted board
@@ -398,7 +426,7 @@ void test_deleteBoard() {
                 failed++;
             }
         }
-        
+
         // Additional test: delete already nullptr board (should not crash)
         testNum++;
         Board nullBoard = {nullptr, LITTLE};
@@ -410,7 +438,7 @@ void test_deleteBoard() {
             printTestResult(testNum, "Delete already nullptr board → no crash", false, "nullptr", "non-null pointer");
             failed++;
         }
-        
+
     } catch (const exception& e) {
         printTestResult(testNum, "No exception thrown during deletion", false, "no exception", e.what());
         failed++;
@@ -436,7 +464,7 @@ void test_initializeBoard()
         std::string description;
         BoardSize size;
     };
-    
+
     TestCase tests[] = {
         {"Initialize LITTLE (11x11) board → correct setup", LITTLE},
         {"Initialize BIG (13x13) board → correct setup", BIG}
@@ -445,103 +473,104 @@ void test_initializeBoard()
     for (size_t testIdx = 0; testIdx < sizeof(tests)/sizeof(TestCase); ++testIdx) {
         testNum++;
         BoardSize size = tests[testIdx].size;
-        
-        // Create expected board
-        Cell** expectedBoard = cb(size);
-        resetBoard(expectedBoard, size);
 
-        // Set fortresses (corners)
-        expectedBoard[0][0].itsCellType = FORTRESS;
-        expectedBoard[0][size-1].itsCellType = FORTRESS;
-        expectedBoard[size-1][0].itsCellType = FORTRESS;
-        expectedBoard[size-1][size-1].itsCellType = FORTRESS;
+        try {
+            // Create expected board
+            Cell** expectedBoard = cb(size);
+            resetBoard(expectedBoard, size);
 
-        // Set king and castle (center)
-        Position kingPos = { (size - 1) / 2, (size - 1) / 2 };
-        expectedBoard[kingPos.itsRow][kingPos.itsCol] = {CASTLE, KING};
+            // Set fortresses (corners)
+            expectedBoard[0][0].itsCellType = FORTRESS;
+            expectedBoard[0][size-1].itsCellType = FORTRESS;
+            expectedBoard[size-1][0].itsCellType = FORTRESS;
+            expectedBoard[size-1][size-1].itsCellType = FORTRESS;
 
-        // Set shields positions (depends on board size)
-        Position shieldsPositions[12] = {
-            { kingPos.itsRow - 1, kingPos.itsCol },
-            { kingPos.itsRow + 1, kingPos.itsCol },
-            { kingPos.itsRow, kingPos.itsCol - 1 },
-            { kingPos.itsRow, kingPos.itsCol + 1 },
-            { kingPos.itsRow - 2, kingPos.itsCol },
-            { kingPos.itsRow + 2, kingPos.itsCol },
-            { kingPos.itsRow, kingPos.itsCol - 2 },
-            { kingPos.itsRow, kingPos.itsCol + 2 }
-        };
-        
-        if (size == LITTLE) {
-            shieldsPositions[8] = { kingPos.itsRow - 1, kingPos.itsCol - 1 };
-            shieldsPositions[9] = { kingPos.itsRow + 1, kingPos.itsCol + 1 };
-            shieldsPositions[10] = { kingPos.itsRow - 1, kingPos.itsCol + 1 };
-            shieldsPositions[11] = { kingPos.itsRow + 1, kingPos.itsCol - 1 };
-        } else {
-            shieldsPositions[8] = { kingPos.itsRow - 3, kingPos.itsCol };
-            shieldsPositions[9] = { kingPos.itsRow + 3, kingPos.itsCol };
-            shieldsPositions[10] = { kingPos.itsRow, kingPos.itsCol + 3 };
-            shieldsPositions[11] = { kingPos.itsRow, kingPos.itsCol - 3 };
-        }
+            // Set king and castle (center)
+            Position kingPos = { (size - 1) / 2, (size - 1) / 2 };
+            expectedBoard[kingPos.itsRow][kingPos.itsCol] = {CASTLE, KING};
 
-        for (const Position& pos : shieldsPositions) {
-            expectedBoard[pos.itsRow][pos.itsCol].itsPieceType = SHIELD;
-        }
+            // Set shields positions (depends on board size)
+            Position shieldsPositions[12] = {
+                { kingPos.itsRow - 1, kingPos.itsCol },
+                { kingPos.itsRow + 1, kingPos.itsCol },
+                { kingPos.itsRow, kingPos.itsCol - 1 },
+                { kingPos.itsRow, kingPos.itsCol + 1 },
+                { kingPos.itsRow - 2, kingPos.itsCol },
+                { kingPos.itsRow + 2, kingPos.itsCol },
+                { kingPos.itsRow, kingPos.itsCol - 2 },
+                { kingPos.itsRow, kingPos.itsCol + 2 }
+            };
 
-        // Set swords positions
-        Position swordsPositions[] = {
-            { kingPos.itsRow, 0 },
-            { kingPos.itsRow - 1, 0 },
-            { kingPos.itsRow - 2, 0 },
-            { kingPos.itsRow + 1, 0 },
-            { kingPos.itsRow + 2, 0 },
-            { kingPos.itsRow, 1 },
-            { kingPos.itsRow, size-1},
-            { kingPos.itsRow - 1, size-1 },
-            { kingPos.itsRow - 2, size-1 },
-            { kingPos.itsRow + 1, size-1 },
-            { kingPos.itsRow + 2, size-1 },
-            { kingPos.itsRow, size-2 },
-            { 0, kingPos.itsCol },
-            { 0, kingPos.itsCol - 1 },
-            { 0, kingPos.itsCol - 2 },
-            { 0, kingPos.itsCol + 1 },
-            { 0, kingPos.itsCol + 2 },
-            { 1, kingPos.itsCol },
-            { size-1, kingPos.itsCol },
-            { size-1, kingPos.itsCol - 1 },
-            { size-1, kingPos.itsCol - 2 },
-            { size-1, kingPos.itsCol + 1 },
-            { size-1, kingPos.itsCol + 2 },
-            { size-2, kingPos.itsCol },
-        };
+            if (size == LITTLE) {
+                shieldsPositions[8] = { kingPos.itsRow - 1, kingPos.itsCol - 1 };
+                shieldsPositions[9] = { kingPos.itsRow + 1, kingPos.itsCol + 1 };
+                shieldsPositions[10] = { kingPos.itsRow - 1, kingPos.itsCol + 1 };
+                shieldsPositions[11] = { kingPos.itsRow + 1, kingPos.itsCol - 1 };
+            } else {
+                shieldsPositions[8] = { kingPos.itsRow - 3, kingPos.itsCol };
+                shieldsPositions[9] = { kingPos.itsRow + 3, kingPos.itsCol };
+                shieldsPositions[10] = { kingPos.itsRow, kingPos.itsCol + 3 };
+                shieldsPositions[11] = { kingPos.itsRow, kingPos.itsCol - 3 };
+            }
 
-        for (const Position& pos : swordsPositions) {
-            expectedBoard[pos.itsRow][pos.itsCol].itsPieceType = SWORD;
-        }
+            for (const Position& pos : shieldsPositions) {
+                expectedBoard[pos.itsRow][pos.itsCol].itsPieceType = SHIELD;
+            }
 
-        // Create and initialize actual board
-        Board actualBoard = {nullptr, size};
-        actualBoard.itsCells = cb(size);
-        initializeBoard(actualBoard);
+            // Set swords positions
+            Position swordsPositions[] = {
+                { kingPos.itsRow, 0 },
+                { kingPos.itsRow - 1, 0 },
+                { kingPos.itsRow - 2, 0 },
+                { kingPos.itsRow + 1, 0 },
+                { kingPos.itsRow + 2, 0 },
+                { kingPos.itsRow, 1 },
+                { kingPos.itsRow, size-1},
+                { kingPos.itsRow - 1, size-1 },
+                { kingPos.itsRow - 2, size-1 },
+                { kingPos.itsRow + 1, size-1 },
+                { kingPos.itsRow + 2, size-1 },
+                { kingPos.itsRow, size-2 },
+                { 0, kingPos.itsCol },
+                { 0, kingPos.itsCol - 1 },
+                { 0, kingPos.itsCol - 2 },
+                { 0, kingPos.itsCol + 1 },
+                { 0, kingPos.itsCol + 2 },
+                { 1, kingPos.itsCol },
+                { size-1, kingPos.itsCol },
+                { size-1, kingPos.itsCol - 1 },
+                { size-1, kingPos.itsCol - 2 },
+                { size-1, kingPos.itsCol + 1 },
+                { size-1, kingPos.itsCol + 2 },
+                { size-2, kingPos.itsCol },
+            };
 
-        // Test 1: Global comparison
-        int diffCount = 0;
-        for (int i = 0; i < size; ++i) {
-            for (int j = 0; j < size; ++j) {
-                if (actualBoard.itsCells[i][j].itsCellType != expectedBoard[i][j].itsCellType
-                    || actualBoard.itsCells[i][j].itsPieceType != expectedBoard[i][j].itsPieceType)
-                {
-                    diffCount++;
+            for (const Position& pos : swordsPositions) {
+                expectedBoard[pos.itsRow][pos.itsCol].itsPieceType = SWORD;
+            }
+
+            // Create and initialize actual board
+            Board actualBoard = {nullptr, size};
+            actualBoard.itsCells = cb(size);
+            initializeBoard(actualBoard);
+
+            // Test 1: Global comparison
+            int diffCount = 0;
+            for (int i = 0; i < size; ++i) {
+                for (int j = 0; j < size; ++j) {
+                    if (actualBoard.itsCells[i][j].itsCellType != expectedBoard[i][j].itsCellType
+                        || actualBoard.itsCells[i][j].itsPieceType != expectedBoard[i][j].itsPieceType)
+                    {
+                        diffCount++;
+                    }
                 }
             }
-        }
-        
-        if (diffCount == 0) {
-            printTestResult(testNum, tests[testIdx].description, true);
-            if (DISPLAY_BOARDS) displayBoard(actualBoard);
-            pass++;
-        } else {
+
+            if (diffCount == 0) {
+                printTestResult(testNum, tests[testIdx].description, true);
+                if (DISPLAY_BOARDS) displayBoard(actualBoard);
+                pass++;
+            } else {
             printTestResult(testNum, tests[testIdx].description, false, "correct board", to_string(diffCount) + " differences");
             if (DISPLAY_BOARDS) {
                 cout << "  Actual:" << endl;
@@ -595,8 +624,8 @@ void test_initializeBoard()
             printTestResult(testNum, "Piece counts: 1 King, 12 Shields, 24 Swords, 4 Fortresses, 1 Castle", true);
             pass++;
         } else {
-            printTestResult(testNum, "Piece counts: 1 King, 12 Shields, 24 Swords, 4 Fortresses, 1 Castle", false, 
-                           "1/12/24/4/1", 
+            printTestResult(testNum, "Piece counts: 1 King, 12 Shields, 24 Swords, 4 Fortresses, 1 Castle", false,
+                           "1/12/24/4/1",
                            to_string(kingCount) + "/" + to_string(shieldCount) + "/" + to_string(swordCount) + "/" + to_string(fortressCount) + "/" + to_string(castleCount));
             failed++;
         }
@@ -607,7 +636,7 @@ void test_initializeBoard()
         int expectedEmptyCells = size * size - 1 - 12 - 24 - 4; // Total - King - Shields - Swords - Fortresses (king is on castle)
         for (int i = 0; i < size; ++i) {
             for (int j = 0; j < size; ++j) {
-                if (actualBoard.itsCells[i][j].itsCellType == NORMAL && 
+                if (actualBoard.itsCells[i][j].itsCellType == NORMAL &&
                     actualBoard.itsCells[i][j].itsPieceType == NONE) {
                     normalEmptyCells++;
                 }
@@ -617,18 +646,26 @@ void test_initializeBoard()
             printTestResult(testNum, "Correct number of empty NORMAL cells (" + to_string(expectedEmptyCells) + ")", true);
             pass++;
         } else {
-            printTestResult(testNum, "Correct number of empty NORMAL cells (" + to_string(expectedEmptyCells) + ")", false, 
+            printTestResult(testNum, "Correct number of empty NORMAL cells (" + to_string(expectedEmptyCells) + ")", false,
                            to_string(expectedEmptyCells), to_string(normalEmptyCells));
             failed++;
         }
 
-        // Cleanup
-        db(expectedBoard, size);
-        db(actualBoard.itsCells, size);
+            // Cleanup
+            db(expectedBoard, size);
+            db(actualBoard.itsCells, size);
+
+        } catch (const exception& e) {
+            printTestException(testNum, tests[testIdx].description, e.what());
+            failed++;
+        } catch (...) {
+            printTestException(testNum, tests[testIdx].description, "Unknown exception/crash");
+            failed++;
+        }
     }
 
     // Edge case tests
-    
+
     // Test: nullptr board
     testNum++;
     Board nullBoard = {nullptr, LITTLE};
@@ -649,9 +686,9 @@ void test_initializeBoard()
     // Save original state
     resetBoard(invalidSizeBoard.itsCells, LITTLE);
     invalidSizeBoard.itsCells[0][0].itsCellType = FORTRESS; // Mark it to track changes
-    
+
     initializeBoard(invalidSizeBoard);
-    
+
     // Board should not be initialized (should remain unchanged or be handled gracefully)
     bool invalidSizeHandled = (invalidSizeBoard.itsCells[0][0].itsCellType == FORTRESS); // Original state preserved
     if (invalidSizeHandled) {
@@ -668,7 +705,7 @@ void test_initializeBoard()
     Board doubleInitBoard = {cb(LITTLE), LITTLE};
     initializeBoard(doubleInitBoard);
     initializeBoard(doubleInitBoard); // Initialize twice
-    
+
     // Count pieces after double initialization
     int kingCount2 = 0, shieldCount2 = 0, swordCount2 = 0;
     for (int i = 0; i < LITTLE; ++i) {
@@ -683,8 +720,8 @@ void test_initializeBoard()
         printTestResult(testNum, "Double initialization → idempotent (still 1/12/24)", true);
         pass++;
     } else {
-        printTestResult(testNum, "Double initialization → idempotent (still 1/12/24)", false, 
-                       "1/12/24", 
+        printTestResult(testNum, "Double initialization → idempotent (still 1/12/24)", false,
+                       "1/12/24",
                        to_string(kingCount2) + "/" + to_string(shieldCount2) + "/" + to_string(swordCount2));
         failed++;
     }
@@ -697,11 +734,11 @@ void test_initializeBoard()
     // Pre-populate some cells
     partialBoard.itsCells[0][0].itsPieceType = SWORD;
     partialBoard.itsCells[5][5].itsPieceType = SHIELD;
-    
+
     initializeBoard(partialBoard);
-    
+
     // After initialization, board should be completely reinitialized
-    bool completelyReinitialized = (partialBoard.itsCells[0][0].itsCellType == FORTRESS && 
+    bool completelyReinitialized = (partialBoard.itsCells[0][0].itsCellType == FORTRESS &&
                                      partialBoard.itsCells[0][0].itsPieceType == NONE &&
                                      partialBoard.itsCells[5][5].itsPieceType == KING);
     if (completelyReinitialized) {
@@ -750,7 +787,7 @@ void test_isValidPosition()
         {"LITTLE - Left edge middle (5,0)", {5, 0}, true, LITTLE},
         {"LITTLE - Right edge middle (5,10)", {5, 10}, true, LITTLE},
         {"LITTLE - Random valid (3,7)", {3, 7}, true, LITTLE},
-        
+
         // LITTLE board (11x11) - Invalid positions (out of bounds)
         {"LITTLE - Row negative (-1,0)", {-1, 0}, false, LITTLE},
         {"LITTLE - Col negative (0,-1)", {0, -1}, false, LITTLE},
@@ -760,7 +797,7 @@ void test_isValidPosition()
         {"LITTLE - Both too large (11,11)", {11, 11}, false, LITTLE},
         {"LITTLE - Row very negative (-100,5)", {-100, 5}, false, LITTLE},
         {"LITTLE - Col very large (5,999)", {5, 999}, false, LITTLE},
-        
+
         // BIG board (13x13) - Valid positions
         {"BIG - Top-left corner (0,0)", {0, 0}, true, BIG},
         {"BIG - Top-right corner (0,12)", {0, 12}, true, BIG},
@@ -772,7 +809,7 @@ void test_isValidPosition()
         {"BIG - Left edge middle (6,0)", {6, 0}, true, BIG},
         {"BIG - Right edge middle (6,12)", {6, 12}, true, BIG},
         {"BIG - Random valid (8,4)", {8, 4}, true, BIG},
-        
+
         // BIG board (13x13) - Invalid positions (out of bounds)
         {"BIG - Row negative (-1,6)", {-1, 6}, false, BIG},
         {"BIG - Col negative (6,-1)", {6, -1}, false, BIG},
@@ -788,12 +825,12 @@ void test_isValidPosition()
     for (const TestCase& test : tests) {
         testNum++;
         bool result = isValidPosition(test.pos, {nullptr, test.boardSize});
-        
+
         if (result == test.expectedValid) {
             printTestResult(testNum, test.description, true);
             pass++;
         } else {
-            printTestResult(testNum, test.description, false, 
+            printTestResult(testNum, test.description, false,
                            test.expectedValid ? "valid" : "invalid",
                            result ? "valid" : "invalid");
             failed++;
@@ -834,16 +871,16 @@ void test_getPositionFromInput() {
         {"K11", true, 10, 10, LITTLE, "LITTLE - Valid 'K11' → (10,10) bottom-right corner"},
         {"F6", true, 5, 5, LITTLE, "LITTLE - Valid 'F6' → (5,5) center"},
         {"C7", true, 2, 6, LITTLE, "LITTLE - Valid 'C7' → (2,6) random position"},
-        
+
         // LITTLE board (11x11) - Valid inputs (lowercase - should work)
         {"a1", true, 0, 0, LITTLE, "LITTLE - Valid lowercase 'a1' → (0,0)"},
         {"k11", true, 10, 10, LITTLE, "LITTLE - Valid lowercase 'k11' → (10,10)"},
-        
+
         // LITTLE board (11x11) - Invalid inputs (out of bounds)
         {"L1", false, -1, -1, LITTLE, "LITTLE - Invalid 'L1' (row L out of bounds, max K)"},
         {"A12", false, -1, -1, LITTLE, "LITTLE - Invalid 'A12' (col 12 out of bounds, max 11)"},
         {"L12", false, -1, -1, LITTLE, "LITTLE - Invalid 'L12' (both row and col out of bounds)"},
-        
+
         // BIG board (13x13) - Valid inputs (uppercase)
         {"A1", true, 0, 0, BIG, "BIG - Valid 'A1' → (0,0) top-left corner"},
         {"A13", true, 0, 12, BIG, "BIG - Valid 'A13' → (0,12) top-right corner"},
@@ -851,16 +888,16 @@ void test_getPositionFromInput() {
         {"M13", true, 12, 12, BIG, "BIG - Valid 'M13' → (12,12) bottom-right corner"},
         {"G7", true, 6, 6, BIG, "BIG - Valid 'G7' → (6,6) center"},
         {"D10", true, 3, 9, BIG, "BIG - Valid 'D10' → (3,9) random position"},
-        
+
         // BIG board (13x13) - Valid inputs (lowercase)
         {"a1", true, 0, 0, BIG, "BIG - Valid lowercase 'a1' → (0,0)"},
         {"m13", true, 12, 12, BIG, "BIG - Valid lowercase 'm13' → (12,12)"},
-        
+
         // BIG board (13x13) - Invalid inputs (out of bounds)
         {"N1", false, -1, -1, BIG, "BIG - Invalid 'N1' (row N out of bounds, max M)"},
         {"A14", false, -1, -1, BIG, "BIG - Invalid 'A14' (col 14 out of bounds, max 13)"},
         {"Z99", false, -1, -1, BIG, "BIG - Invalid 'Z99' (both row and col out of bounds)"},
-        
+
         // Format errors - Invalid formats
         {"1A", false, -1, -1, LITTLE, "Invalid format '1A' (number before letter)"},
         {"AA", false, -1, -1, LITTLE, "Invalid format 'AA' (two letters)"},
@@ -870,7 +907,7 @@ void test_getPositionFromInput() {
         {"A-1", false, -1, -1, LITTLE, "Invalid format 'A-1' (negative number)"},
         {"A 1", false, -1, -1, LITTLE, "Invalid format 'A 1' (space in input)"},
         {"@5", false, -1, -1, LITTLE, "Invalid format '@5' (special character)"},
-        
+
         // Security validations - Zero and overflow
         {"A0", false, -1, -1, LITTLE, "Invalid 'A0' (zero not allowed, positions start at 1)"},
         {"A999999999999999", false, -1, -1, LITTLE, "Invalid 'A999999999999999' (overflow protection)"},
@@ -891,9 +928,9 @@ void test_getPositionFromInput() {
         // Redirect cout if DISPLAY_PROMPTS is false to hide prompts and error messages
         if (DISPLAY_PROMPTS) cout << COLOR_CYAN << "  [Test " << testNum << "] Input: '" << testCase.input << "'" << COLOR_RESET << endl;
         if (!DISPLAY_PROMPTS) oldCoutBuf = cout.rdbuf(oss.rdbuf());
-        
+
         bool result = getPositionFromInput(position, {nullptr, testCase.boardSize});
-        
+
         // Restore cout
         if (!DISPLAY_PROMPTS) {
             cout.rdbuf(oldCoutBuf);
@@ -907,7 +944,7 @@ void test_getPositionFromInput() {
 
         if (result && testCase.expectedResult) {
             if (position.itsRow != testCase.expectedRow || position.itsCol != testCase.expectedCol) {
-                printTestResult(testNum, testCase.description, false, 
+                printTestResult(testNum, testCase.description, false,
                     "(" + to_string(testCase.expectedRow) + "," + to_string(testCase.expectedCol) + ")",
                     "(" + to_string(position.itsRow) + "," + to_string(position.itsCol) + ")");
                 passed = false;
@@ -918,18 +955,16 @@ void test_getPositionFromInput() {
             printTestResult(testNum, testCase.description, true);
             pass++;
         } else {
-            if (result == testCase.expectedResult) {
-                printTestResult(testNum, testCase.description, false, 
-                    testCase.expectedResult ? "valid" : "invalid",
-                    result ? "valid" : "invalid");
-            }
+            printTestResult(testNum, testCase.description, false,
+                testCase.expectedResult ? "valid" : "invalid",
+                result ? "valid" : "invalid");
             failed++;
         }
     }
 
     // Restore original cin buffer
     cin.rdbuf(oldCinBuf);
-    
+
     printTestSummary("getPositionFromInput", pass, failed);
 }
 
@@ -964,38 +999,38 @@ void test_isEmptyCell()
         {{0, 0}, NORMAL, NONE, true, LITTLE, "LITTLE - Empty NORMAL cell (A1)"},
         {{1, 1}, FORTRESS, NONE, true, LITTLE, "LITTLE - Empty FORTRESS cell (B2)"},
         {{2, 2}, CASTLE, NONE, true, LITTLE, "LITTLE - Empty CASTLE cell (C3)"},
-        
+
         // Non-empty cells with SWORD on different cell types
         {{0, 1}, NORMAL, SWORD, false, LITTLE, "LITTLE - SWORD on NORMAL cell (A2)"},
         {{1, 2}, FORTRESS, SWORD, false, LITTLE, "LITTLE - SWORD on FORTRESS cell (B3)"},
         {{2, 3}, CASTLE, SWORD, false, LITTLE, "LITTLE - SWORD on CASTLE cell (C4)"},
-        
+
         // Non-empty cells with SHIELD on different cell types
         {{3, 0}, NORMAL, SHIELD, false, LITTLE, "LITTLE - SHIELD on NORMAL cell (D1)"},
         {{3, 1}, FORTRESS, SHIELD, false, LITTLE, "LITTLE - SHIELD on FORTRESS cell (D2)"},
         {{3, 2}, CASTLE, SHIELD, false, LITTLE, "LITTLE - SHIELD on CASTLE cell (D3)"},
-        
+
         // Non-empty cells with KING on different cell types
         {{4, 0}, NORMAL, KING, false, LITTLE, "LITTLE - KING on NORMAL cell (E1)"},
         {{4, 1}, FORTRESS, KING, false, LITTLE, "LITTLE - KING on FORTRESS cell (E2)"},
         {{4, 2}, CASTLE, KING, false, LITTLE, "LITTLE - KING on CASTLE cell (E3)"},
-        
+
         // ===== BIG BOARD (13x13) =====
         // Empty cells (itsPieceType == NONE)
         {{0, 0}, NORMAL, NONE, true, BIG, "BIG - Empty NORMAL cell (A1)"},
         {{1, 1}, FORTRESS, NONE, true, BIG, "BIG - Empty FORTRESS cell (B2)"},
         {{2, 2}, CASTLE, NONE, true, BIG, "BIG - Empty CASTLE cell (C3)"},
-        
+
         // Non-empty cells with SWORD on different cell types
         {{0, 1}, NORMAL, SWORD, false, BIG, "BIG - SWORD on NORMAL cell (A2)"},
         {{1, 2}, FORTRESS, SWORD, false, BIG, "BIG - SWORD on FORTRESS cell (B3)"},
         {{2, 3}, CASTLE, SWORD, false, BIG, "BIG - SWORD on CASTLE cell (C4)"},
-        
+
         // Non-empty cells with SHIELD on different cell types
         {{3, 0}, NORMAL, SHIELD, false, BIG, "BIG - SHIELD on NORMAL cell (D1)"},
         {{3, 1}, FORTRESS, SHIELD, false, BIG, "BIG - SHIELD on FORTRESS cell (D2)"},
         {{3, 2}, CASTLE, SHIELD, false, BIG, "BIG - SHIELD on CASTLE cell (D3)"},
-        
+
         // Non-empty cells with KING on different cell types
         {{4, 0}, NORMAL, KING, false, BIG, "BIG - KING on NORMAL cell (E1)"},
         {{4, 1}, FORTRESS, KING, false, BIG, "BIG - KING on FORTRESS cell (E2)"},
@@ -1027,7 +1062,7 @@ void test_isEmptyCell()
         testNum++;
         Cell** currentBoard = (tc.boardSize == LITTLE) ? boardLittle : boardBig;
         Board board = {currentBoard, tc.boardSize};
-        
+
         bool result = isEmptyCell(board, tc.pos);
         bool testPassed = (result == tc.expectedEmpty);
 
@@ -1035,7 +1070,7 @@ void test_isEmptyCell()
             printTestResult(testNum, tc.description, true);
             pass++;
         } else {
-            printTestResult(testNum, tc.description, false, 
+            printTestResult(testNum, tc.description, false,
                            tc.expectedEmpty ? "empty" : "not empty",
                            result ? "empty" : "not empty");
             failed++;
@@ -1045,7 +1080,7 @@ void test_isEmptyCell()
     // Clean up
     db(boardLittle, LITTLE);
     db(boardBig, BIG);
-    
+
     printTestSummary("isEmptyCell", pass, failed);
 }
 
@@ -1090,36 +1125,36 @@ void test_isValidMovement()
         {LITTLE, DEFENSE, {5, 5}, KING, NORMAL, {{5, 5}, {5, 5}}, {}, {}, {}, 0, false, "LITTLE/DEFENSE - KING same cell F6→F6 invalid"},
         // ==================================================================
         // ===== LITTLE BOARD (11x11) =====
-        
+
         // Category 1: Player piece validation - ATTACK
         {LITTLE, ATTACK, {3, 3}, SWORD, NORMAL, {{3, 3}, {3, 6}}, {}, {}, {}, 0, true, "LITTLE/ATTACK - Can move own SWORD from D4 to D7"},
         {LITTLE, ATTACK, {2, 2}, SHIELD, NORMAL, {{2, 2}, {2, 5}}, {}, {}, {}, 0, false, "LITTLE/ATTACK - Cannot move opponent's SHIELD from C3 to C6"},
         {LITTLE, ATTACK, {1, 1}, KING, NORMAL, {{1, 1}, {1, 4}}, {}, {}, {}, 0, false, "LITTLE/ATTACK - Cannot move opponent's KING from B2 to B5"},
-        
+
         // Category 2: Player piece validation - DEFENSE
         {LITTLE, DEFENSE, {3, 3}, SHIELD, NORMAL, {{3, 3}, {3, 6}}, {}, {}, {}, 0, true, "LITTLE/DEFENSE - Can move own SHIELD from D4 to D7"},
         {LITTLE, DEFENSE, {1, 1}, KING, NORMAL, {{1, 1}, {1, 4}}, {}, {}, {}, 0, true, "LITTLE/DEFENSE - Can move own KING from B2 to B5"},
         {LITTLE, DEFENSE, {2, 2}, SWORD, NORMAL, {{2, 2}, {2, 5}}, {}, {}, {}, 0, false, "LITTLE/DEFENSE - Cannot move opponent's SWORD from C3 to C6"},
-        
+
         // Category 3: Movement direction validation
         {LITTLE, ATTACK, {3, 3}, SWORD, NORMAL, {{3, 3}, {6, 6}}, {}, {}, {}, 0, false, "LITTLE/ATTACK - Cannot move diagonally D4 to G7"},
         {LITTLE, DEFENSE, {2, 2}, SHIELD, NORMAL, {{2, 2}, {7, 2}}, {}, {}, {}, 0, true, "LITTLE/DEFENSE - Can move vertically C3 to H3"},
-        
+
         // Category 4: Path obstruction - pieces blocking
         {LITTLE, ATTACK, {3, 3}, SWORD, NORMAL, {{3, 3}, {3, 7}}, {{3, 5}}, {SHIELD}, {NORMAL}, 1, false, "LITTLE/ATTACK - SWORD D4 to D8 blocked by SHIELD at D6"},
         {LITTLE, DEFENSE, {2, 2}, SHIELD, NORMAL, {{2, 2}, {7, 2}}, {{5, 2}}, {SWORD}, {NORMAL}, 1, false, "LITTLE/DEFENSE - SHIELD C3 to H3 blocked by SWORD at F3"},
         {LITTLE, DEFENSE, {1, 1}, KING, NORMAL, {{1, 1}, {6, 1}}, {{4, 1}}, {SHIELD}, {NORMAL}, 1, false, "LITTLE/DEFENSE - KING B2 to G2 blocked by SHIELD at E2"},
-        
+
         // Category 5: Special cells - FORTRESS blocking non-KING pieces
         {LITTLE, ATTACK, {3, 0}, SWORD, NORMAL, {{3, 0}, {0, 0}}, {{0, 0}}, {NONE}, {FORTRESS}, 1, false, "LITTLE/ATTACK - SWORD D1 cannot enter FORTRESS at A1"},
         {LITTLE, DEFENSE, {3, 10}, SHIELD, NORMAL, {{3, 10}, {0, 10}}, {{0, 10}}, {NONE}, {FORTRESS}, 1, false, "LITTLE/DEFENSE - SHIELD D11 cannot enter FORTRESS at A11"},
         {LITTLE, DEFENSE, {2, 0}, KING, NORMAL, {{2, 0}, {0, 0}}, {{0, 0}}, {NONE}, {FORTRESS}, 1, true, "LITTLE/DEFENSE - KING C1 can enter FORTRESS at A1"},
-        
+
         // Category 6: Special cells - CASTLE blocking non-KING pieces
         {LITTLE, ATTACK, {3, 5}, SWORD, NORMAL, {{3, 5}, {5, 5}}, {{5, 5}}, {NONE}, {CASTLE}, 1, false, "LITTLE/ATTACK - SWORD D6 cannot enter CASTLE at F6"},
         {LITTLE, DEFENSE, {3, 5}, SHIELD, NORMAL, {{3, 5}, {5, 5}}, {{5, 5}}, {NONE}, {CASTLE}, 1, false, "LITTLE/DEFENSE - SHIELD D6 cannot enter CASTLE at F6"},
         {LITTLE, DEFENSE, {7, 5}, KING, NORMAL, {{7, 5}, {5, 5}}, {{5, 5}}, {NONE}, {CASTLE}, 1, true, "LITTLE/DEFENSE - KING H6 can enter CASTLE at F6"},
-        
+
         // Category 7: Special cells - CASTLE/FORTRESS traversal (on path, not destination)
         {LITTLE, ATTACK, {3, 5}, SWORD, NORMAL, {{3, 5}, {7, 5}}, {{5, 5}}, {NONE}, {CASTLE}, 1, false, "LITTLE/ATTACK - SWORD D6→H6 cannot traverse CASTLE at F6"},
         {LITTLE, DEFENSE, {3, 5}, SHIELD, NORMAL, {{3, 5}, {7, 5}}, {{5, 5}}, {NONE}, {CASTLE}, 1, false, "LITTLE/DEFENSE - SHIELD D6→H6 cannot traverse CASTLE at F6"},
@@ -1127,44 +1162,44 @@ void test_isValidMovement()
         {LITTLE, ATTACK, {0, 3}, SWORD, NORMAL, {{0, 3}, {0, 7}}, {{0, 5}}, {NONE}, {FORTRESS}, 1, false, "LITTLE/ATTACK - SWORD A4→A8 cannot traverse FORTRESS at A6"},
         {LITTLE, DEFENSE, {0, 3}, SHIELD, NORMAL, {{0, 3}, {0, 7}}, {{0, 5}}, {NONE}, {FORTRESS}, 1, false, "LITTLE/DEFENSE - SHIELD A4→A8 cannot traverse FORTRESS at A6"},
         {LITTLE, DEFENSE, {0, 3}, KING, NORMAL, {{0, 3}, {0, 7}}, {{0, 5}}, {NONE}, {FORTRESS}, 1, false, "LITTLE/DEFENSE - KING A4→A8 cannot traverse FORTRESS at A6"},
-        
+
         // Category 8: Edge cases
         {LITTLE, ATTACK, {4, 4}, NONE, NORMAL, {{4, 4}, {4, 7}}, {}, {}, {}, 0, false, "LITTLE/ATTACK - Cannot move from empty cell E5"},
         {LITTLE, DEFENSE, {5, 5}, NONE, NORMAL, {{5, 5}, {5, 2}}, {}, {}, {}, 0, false, "LITTLE/DEFENSE - Cannot move from empty cell F6"},
         {LITTLE, ATTACK, {3, 3}, SWORD, NORMAL, {{3, 3}, {8, 3}}, {}, {}, {}, 0, true, "LITTLE/ATTACK - SWORD can move long distance D4 to I4"},
         {LITTLE, DEFENSE, {2, 2}, KING, NORMAL, {{2, 2}, {2, 9}}, {}, {}, {}, 0, true, "LITTLE/DEFENSE - KING can move long distance C3 to C10"},
-        
+
         // ===== BIG BOARD (13x13) =====
-        
+
         // Category 1: Player piece validation - ATTACK
         {BIG, ATTACK, {4, 4}, SWORD, NORMAL, {{4, 4}, {4, 8}}, {}, {}, {}, 0, true, "BIG/ATTACK - Can move own SWORD from E5 to E9"},
         {BIG, ATTACK, {3, 3}, SHIELD, NORMAL, {{3, 3}, {3, 7}}, {}, {}, {}, 0, false, "BIG/ATTACK - Cannot move opponent's SHIELD from D4 to D8"},
         {BIG, ATTACK, {2, 2}, KING, NORMAL, {{2, 2}, {2, 6}}, {}, {}, {}, 0, false, "BIG/ATTACK - Cannot move opponent's KING from C3 to C7"},
-        
+
         // Category 2: Player piece validation - DEFENSE
         {BIG, DEFENSE, {4, 4}, SHIELD, NORMAL, {{4, 4}, {4, 8}}, {}, {}, {}, 0, true, "BIG/DEFENSE - Can move own SHIELD from E5 to E9"},
         {BIG, DEFENSE, {2, 2}, KING, NORMAL, {{2, 2}, {2, 6}}, {}, {}, {}, 0, true, "BIG/DEFENSE - Can move own KING from C3 to C7"},
         {BIG, DEFENSE, {3, 3}, SWORD, NORMAL, {{3, 3}, {3, 7}}, {}, {}, {}, 0, false, "BIG/DEFENSE - Cannot move opponent's SWORD from D4 to D8"},
-        
+
         // Category 3: Movement direction validation
         {BIG, ATTACK, {4, 4}, SWORD, NORMAL, {{4, 4}, {7, 7}}, {}, {}, {}, 0, false, "BIG/ATTACK - Cannot move diagonally E5 to H8"},
         {BIG, DEFENSE, {3, 3}, SHIELD, NORMAL, {{3, 3}, {9, 3}}, {}, {}, {}, 0, true, "BIG/DEFENSE - Can move vertically D4 to J4"},
-        
+
         // Category 4: Path obstruction - pieces blocking
         {BIG, ATTACK, {4, 4}, SWORD, NORMAL, {{4, 4}, {4, 9}}, {{4, 7}}, {SHIELD}, {NORMAL}, 1, false, "BIG/ATTACK - SWORD E5 to E10 blocked by SHIELD at E8"},
         {BIG, DEFENSE, {3, 3}, SHIELD, NORMAL, {{3, 3}, {9, 3}}, {{6, 3}}, {SWORD}, {NORMAL}, 1, false, "BIG/DEFENSE - SHIELD D4 to J4 blocked by SWORD at G4"},
         {BIG, DEFENSE, {2, 2}, KING, NORMAL, {{2, 2}, {8, 2}}, {{5, 2}}, {SHIELD}, {NORMAL}, 1, false, "BIG/DEFENSE - KING C3 to I3 blocked by SHIELD at F3"},
-        
+
         // Category 5: Special cells - FORTRESS blocking non-KING pieces
         {BIG, ATTACK, {4, 0}, SWORD, NORMAL, {{4, 0}, {0, 0}}, {{0, 0}}, {NONE}, {FORTRESS}, 1, false, "BIG/ATTACK - SWORD E1 cannot enter FORTRESS at A1"},
         {BIG, DEFENSE, {4, 12}, SHIELD, NORMAL, {{4, 12}, {0, 12}}, {{0, 12}}, {NONE}, {FORTRESS}, 1, false, "BIG/DEFENSE - SHIELD E13 cannot enter FORTRESS at A13"},
         {BIG, DEFENSE, {3, 0}, KING, NORMAL, {{3, 0}, {0, 0}}, {{0, 0}}, {NONE}, {FORTRESS}, 1, true, "BIG/DEFENSE - KING D1 can enter FORTRESS at A1"},
-        
+
         // Category 6: Special cells - CASTLE blocking non-KING pieces
         {BIG, ATTACK, {4, 6}, SWORD, NORMAL, {{4, 6}, {6, 6}}, {{6, 6}}, {NONE}, {CASTLE}, 1, false, "BIG/ATTACK - SWORD E7 cannot enter CASTLE at G7"},
         {BIG, DEFENSE, {4, 6}, SHIELD, NORMAL, {{4, 6}, {6, 6}}, {{6, 6}}, {NONE}, {CASTLE}, 1, false, "BIG/DEFENSE - SHIELD E7 cannot enter CASTLE at G7"},
         {BIG, DEFENSE, {9, 6}, KING, NORMAL, {{9, 6}, {6, 6}}, {{6, 6}}, {NONE}, {CASTLE}, 1, true, "BIG/DEFENSE - KING J7 can enter CASTLE at G7"},
-        
+
         // Category 7: Special cells - CASTLE/FORTRESS traversal (on path, not destination)
         {BIG, ATTACK, {4, 6}, SWORD, NORMAL, {{4, 6}, {9, 6}}, {{6, 6}}, {NONE}, {CASTLE}, 1, false, "BIG/ATTACK - SWORD E7→J7 cannot traverse CASTLE at G7"},
         {BIG, DEFENSE, {4, 6}, SHIELD, NORMAL, {{4, 6}, {9, 6}}, {{6, 6}}, {NONE}, {CASTLE}, 1, false, "BIG/DEFENSE - SHIELD E7→J7 cannot traverse CASTLE at G7"},
@@ -1172,7 +1207,7 @@ void test_isValidMovement()
         {BIG, ATTACK, {0, 3}, SWORD, NORMAL, {{0, 3}, {0, 8}}, {{0, 6}}, {NONE}, {FORTRESS}, 1, false, "BIG/ATTACK - SWORD A4→A9 cannot traverse FORTRESS at A7"},
         {BIG, DEFENSE, {0, 3}, SHIELD, NORMAL, {{0, 3}, {0, 8}}, {{0, 6}}, {NONE}, {FORTRESS}, 1, false, "BIG/DEFENSE - SHIELD A4→A9 cannot traverse FORTRESS at A6"},
         {BIG, DEFENSE, {0, 3}, KING, NORMAL, {{0, 3}, {0, 8}}, {{0, 6}}, {NONE}, {FORTRESS}, 1, false, "BIG/DEFENSE - KING A4→A9 cannot traverse FORTRESS at A7"},
-        
+
         // Category 8: Edge cases
         {BIG, ATTACK, {5, 5}, NONE, NORMAL, {{5, 5}, {5, 9}}, {}, {}, {}, 0, false, "BIG/ATTACK - Cannot move from empty cell F6"},
         {BIG, DEFENSE, {6, 6}, NONE, NORMAL, {{6, 6}, {6, 3}}, {}, {}, {}, 0, false, "BIG/DEFENSE - Cannot move from empty cell G7"},
@@ -1291,34 +1326,34 @@ void test_movePiece()
         // SWORD tests - simple moves on NORMAL cells
         {LITTLE, SWORD, {5, 5}, {5, 8}, NORMAL, NORMAL, "LITTLE - SWORD moves F6→F9 (NORMAL→NORMAL horizontal)"},
         {LITTLE, SWORD, {3, 3}, {7, 3}, NORMAL, NORMAL, "LITTLE - SWORD moves D4→H4 (NORMAL→NORMAL vertical)"},
-        
+
         // SHIELD tests - simple moves on NORMAL cells
         {LITTLE, SHIELD, {4, 4}, {4, 7}, NORMAL, NORMAL, "LITTLE - SHIELD moves E5→E8 (NORMAL→NORMAL horizontal)"},
         {LITTLE, SHIELD, {2, 2}, {6, 2}, NORMAL, NORMAL, "LITTLE - SHIELD moves C3→G3 (NORMAL→NORMAL vertical)"},
-        
+
         // KING tests - moves from NORMAL to various cell types
         {LITTLE, KING, {5, 5}, {5, 2}, NORMAL, NORMAL, "LITTLE - KING moves F6→F3 (NORMAL→NORMAL)"},
         {LITTLE, KING, {5, 5}, {0, 5}, NORMAL, FORTRESS, "LITTLE - KING moves F6→A6 (NORMAL→FORTRESS)"},
         {LITTLE, KING, {3, 3}, {5, 3}, NORMAL, CASTLE, "LITTLE - KING moves D4→F4 (NORMAL→CASTLE)"},
-        
+
         // KING tests - moves from special cells (FORTRESS/CASTLE) to NORMAL
         {LITTLE, KING, {0, 0}, {0, 3}, FORTRESS, NORMAL, "LITTLE - KING moves A1→A4 (FORTRESS→NORMAL)"},
         {LITTLE, KING, {5, 5}, {5, 8}, CASTLE, NORMAL, "LITTLE - KING moves F6→F9 (CASTLE→NORMAL)"},
-        
+
         // ===== BIG BOARD (13x13) =====
         // SWORD tests - simple moves on NORMAL cells
         {BIG, SWORD, {6, 6}, {6, 10}, NORMAL, NORMAL, "BIG - SWORD moves G7→G11 (NORMAL→NORMAL horizontal)"},
         {BIG, SWORD, {3, 3}, {8, 3}, NORMAL, NORMAL, "BIG - SWORD moves D4→I4 (NORMAL→NORMAL vertical)"},
-        
+
         // SHIELD tests - simple moves on NORMAL cells
         {BIG, SHIELD, {5, 5}, {5, 9}, NORMAL, NORMAL, "BIG - SHIELD moves F6→F10 (NORMAL→NORMAL horizontal)"},
         {BIG, SHIELD, {2, 2}, {7, 2}, NORMAL, NORMAL, "BIG - SHIELD moves C3→H3 (NORMAL→NORMAL vertical)"},
-        
+
         // KING tests - moves from NORMAL to various cell types
         {BIG, KING, {6, 6}, {6, 3}, NORMAL, NORMAL, "BIG - KING moves G7→G4 (NORMAL→NORMAL)"},
         {BIG, KING, {6, 6}, {0, 6}, NORMAL, FORTRESS, "BIG - KING moves G7→A7 (NORMAL→FORTRESS)"},
         {BIG, KING, {3, 3}, {6, 3}, NORMAL, CASTLE, "BIG - KING moves D4→G4 (NORMAL→CASTLE)"},
-        
+
         // KING tests - moves from special cells (FORTRESS/CASTLE) to NORMAL
         {BIG, KING, {0, 0}, {0, 4}, FORTRESS, NORMAL, "BIG - KING moves A1→A5 (FORTRESS→NORMAL)"},
         {BIG, KING, {6, 6}, {6, 9}, CASTLE, NORMAL, "BIG - KING moves G7→G10 (CASTLE→NORMAL)"},
@@ -1327,40 +1362,40 @@ void test_movePiece()
     // Execute all test cases
     for (const TestCase& tc : tests) {
         testNum++;
-        
+
         // Setup board
         Game game;
         game.itsBoard = {cb(tc.size), tc.size};
         resetBoard(game.itsBoard.itsCells, tc.size);
-        
+
         // Setup cell types at start and end positions
         game.itsBoard.itsCells[tc.startPos.itsRow][tc.startPos.itsCol].itsCellType = tc.startCellType;
         game.itsBoard.itsCells[tc.endPos.itsRow][tc.endPos.itsCol].itsCellType = tc.endCellType;
-        
+
         // Place the piece at start position
         game.itsBoard.itsCells[tc.startPos.itsRow][tc.startPos.itsCol].itsPieceType = tc.pieceType;
-        
+
         if (DISPLAY_BOARDS) {
             cout << "  Before move:" << endl;
             displayBoard(game.itsBoard);
         }
-        
+
         // Execute move
         movePiece(game, {tc.startPos, tc.endPos});
-        
+
         if (DISPLAY_BOARDS) {
             cout << "  After move:" << endl;
             displayBoard(game.itsBoard);
         }
-        
+
         // Verify move result
         bool startEmpty = (game.itsBoard.itsCells[tc.startPos.itsRow][tc.startPos.itsCol].itsPieceType == NONE);
         bool endHasPiece = (game.itsBoard.itsCells[tc.endPos.itsRow][tc.endPos.itsCol].itsPieceType == tc.pieceType);
-        
+
         // Verify cell types are preserved (movePiece should not modify cellType)
         bool startCellTypePreserved = (game.itsBoard.itsCells[tc.startPos.itsRow][tc.startPos.itsCol].itsCellType == tc.startCellType);
         bool endCellTypePreserved = (game.itsBoard.itsCells[tc.endPos.itsRow][tc.endPos.itsCol].itsCellType == tc.endCellType);
-        
+
         if (startEmpty && endHasPiece && startCellTypePreserved && endCellTypePreserved) {
             printTestResult(testNum, tc.description, true);
             pass++;
@@ -1371,11 +1406,11 @@ void test_movePiece()
             if (!endHasPiece) actual += "end no piece ";
             if (!startCellTypePreserved) actual += "start cellType changed ";
             if (!endCellTypePreserved) actual += "end cellType changed ";
-            
+
             printTestResult(testNum, tc.description, false, expected, actual);
             failed++;
         }
-        
+
         // Cleanup
         db(game.itsBoard.itsCells, tc.size);
     }
@@ -1429,7 +1464,7 @@ void test_capturePieces()
         // LEVEL 1: SIMPLE TESTS - Basic single captures
         // One capture at a time, to understand each type of assistant
         // ========================================
-        
+
         // Test 1: ATTACK capture with SWORD assistant (friendly piece)
         {
             ATTACK, SWORD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1442,7 +1477,7 @@ void test_capturePieces()
             {}, 0,
             "ATTACK simple - SWORD F3→F5 capture SHIELD at F6 (assistant: SWORD)"
         },
-        
+
         // Test 2: ATTACK capture with FORTRESS assistant
         {
             ATTACK, SWORD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1455,7 +1490,7 @@ void test_capturePieces()
             {}, 0,
             "ATTACK simple - SWORD F3→F5 capture SHIELD at F6 (assistant: FORTRESS)"
         },
-        
+
         // Test 3: ATTACK capture with empty CASTLE assistant
         {
             ATTACK, SWORD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1468,7 +1503,7 @@ void test_capturePieces()
             {}, 0,
             "ATTACK simple - SWORD F3→F5 capture SHIELD at F6 (assistant: empty CASTLE)"
         },
-        
+
         // Test 4: DEFENSE SHIELD capture with SHIELD assistant (friendly piece)
         {
             DEFENSE, SHIELD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1481,7 +1516,7 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE simple - SHIELD F3→F5 capture SWORD at F6 (assistant: SHIELD)"
         },
-        
+
         // Test 5: DEFENSE SHIELD capture with KING assistant
         {
             DEFENSE, SHIELD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1494,7 +1529,7 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE simple - SHIELD F3→F5 capture SWORD at F6 (assistant: KING)"
         },
-        
+
         // Test 6: DEFENSE SHIELD capture with FORTRESS assistant
         {
             DEFENSE, SHIELD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1507,7 +1542,7 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE simple - SHIELD F3→F5 capture SWORD at F6 (assistant: FORTRESS)"
         },
-        
+
         // Test 7: DEFENSE SHIELD capture with CASTLE assistant
         {
             DEFENSE, SHIELD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1520,7 +1555,7 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE simple - SHIELD F3→F5 capture SWORD at F6 (assistant: CASTLE)"
         },
-        
+
         // Test 8: DEFENSE KING capture with SHIELD assistant
         {
             DEFENSE, KING, {{5, 2}, {5, 4}}, LITTLE,
@@ -1533,7 +1568,7 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE simple - KING F3→F5 capture SWORD at F6 (assistant: SHIELD)"
         },
-        
+
         // Test 9: DEFENSE KING capture with FORTRESS assistant
         {
             DEFENSE, KING, {{5, 2}, {5, 4}}, LITTLE,
@@ -1546,7 +1581,7 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE simple - KING F3→F5 capture SWORD at F6 (assistant: FORTRESS)"
         },
-        
+
         // Test 10: DEFENSE KING capture with CASTLE assistant
         {
             DEFENSE, KING, {{5, 2}, {5, 4}}, LITTLE,
@@ -1559,10 +1594,10 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE simple - KING F3→F5 capture SWORD at F6 (assistant: CASTLE)"
         },
-        
+
         // ===== Bidirectional tests - Capture in reverse direction =====
         // (Assistant BEFORE captured piece)
-        
+
         // Test 11: ATTACK capture reverse direction (assistant→captured→moving piece)
         {
             ATTACK, SWORD, {{5, 7}, {5, 5}}, LITTLE,
@@ -1575,7 +1610,7 @@ void test_capturePieces()
             {}, 0,
             "ATTACK reverse - SWORD F8→F6 capture SHIELD at F5 (assistant BEFORE captured)"
         },
-        
+
         // Test 12: DEFENSE SHIELD capture reverse direction
         {
             DEFENSE, SHIELD, {{5, 7}, {5, 5}}, LITTLE,
@@ -1588,7 +1623,7 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE reverse - SHIELD F8→F6 capture SWORD at F5 (assistant BEFORE captured)"
         },
-        
+
         // Test 13: Test West direction (left) - normal capture
         {
             ATTACK, SWORD, {{7, 5}, {5, 5}}, LITTLE,
@@ -1601,7 +1636,7 @@ void test_capturePieces()
             {}, 0,
             "ATTACK direction West - SWORD F8→F6 capture SHIELD at F5 (move from East)"
         },
-        
+
         // Test 14: Test East direction (right) - normal capture
         {
             ATTACK, SWORD, {{3, 5}, {5, 5}}, LITTLE,
@@ -1614,12 +1649,12 @@ void test_capturePieces()
             {}, 0,
             "ATTACK direction East - SWORD F4→F6 capture SHIELD at F7 (move from West)"
         },
-        
+
         // ========================================
         // LEVEL 2: INTERMEDIATE TESTS - Non-captures and protections
         // Understanding when captures do NOT occur
         // ========================================
-        
+
         // Test 15: No capture - piece from same team
         {
             ATTACK, SWORD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1632,7 +1667,7 @@ void test_capturePieces()
             {{{5, 5}, SWORD}}, 1,  // Piece remains
             "ATTACK - SWORD F3→F5: no capture of SWORD at F6 (same team)"
         },
-        
+
         // Test 16: No capture - piece protected by friendly piece
         {
             ATTACK, SWORD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1645,7 +1680,7 @@ void test_capturePieces()
             {{{5, 5}, SHIELD}}, 1,
             "ATTACK - SWORD F3→F5: SHIELD at F6 protected by SHIELD at F7"
         },
-        
+
         // Test 17: No capture - CASTLE with KING (special protection)
         {
             ATTACK, SWORD, {{5, 3}, {5, 4}}, LITTLE,
@@ -1658,7 +1693,7 @@ void test_capturePieces()
             {{{5, 5}, SHIELD}, {{5, 6}, KING}}, 2,
             "ATTACK - SWORD F4→F5: SHIELD at F6 NOT captured (KING in CASTLE protects)"
         },
-        
+
         // Test 18: No capture - DEFENSE same team
         {
             DEFENSE, SHIELD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1671,7 +1706,7 @@ void test_capturePieces()
             {{{5, 5}, SHIELD}}, 1,
             "DEFENSE - SHIELD F3→F5: no capture of SHIELD at F6 (same team)"
         },
-        
+
         // Test 19: No capture - DEFENSE protected piece
         {
             DEFENSE, SHIELD, {{5, 2}, {5, 4}}, LITTLE,
@@ -1684,12 +1719,12 @@ void test_capturePieces()
             {{{5, 5}, SWORD}}, 1,
             "DEFENSE - SHIELD F3→F5: SWORD at F6 protected by SWORD at F7"
         },
-        
+
         // ========================================
         // LEVEL 3: ADVANCED TESTS - Multiple captures and complex cases
         // Real game situations with multiple captures
         // ========================================
-        
+
         // Test 20: Multiple captures - 2 directions
         {
             ATTACK, SWORD, {{5, 3}, {5, 5}}, LITTLE,
@@ -1702,7 +1737,7 @@ void test_capturePieces()
             {}, 0,
             "ATTACK - SWORD F4→F6 captures 2 SHIELDs (North and South)"
         },
-        
+
         // Test 21: Multiple captures - 3 directions
         {
             DEFENSE, KING, {{5, 2}, {5, 5}}, LITTLE,
@@ -1716,7 +1751,7 @@ void test_capturePieces()
             {}, 0,
             "DEFENSE - KING F3→F6 captures 3 SWORDs (3 directions)"
         },
-        
+
         // Test 22: Mixed captures + non-captures
         {
             ATTACK, SWORD, {{5, 3}, {5, 5}}, LITTLE,
@@ -1730,12 +1765,12 @@ void test_capturePieces()
             {{{6, 5}, SHIELD}, {{5, 6}, SWORD}}, 2,  // Others remain
             "ATTACK - SWORD F4→F6: 1 capture (North), 2 no-captures (South protected, East same team)"
         },
-        
+
         // ========================================
         // LEVEL 4: EDGE CASES - Special situations
         // Board edges, BIG board, etc.
         // ========================================
-        
+
         // Test 23: Board edge - valid capture
         {
             ATTACK, SWORD, {{0, 1}, {0, 2}}, LITTLE,
@@ -1748,7 +1783,7 @@ void test_capturePieces()
             {}, 0,
             "ATTACK - SWORD A2→A3 on edge: captures SHIELD at A4"
         },
-        
+
         // Test 24: Board edge - no capture (afterNextPos invalid)
         {
             ATTACK, SWORD, {{5, 9}, {5, 10}}, LITTLE,
@@ -1761,7 +1796,7 @@ void test_capturePieces()
             {{{4, 10}, SHIELD}, {{6, 10}, SHIELD}}, 2,
             "ATTACK - SWORD F10→F11 at edge: no captures (afterNextPos out of bounds)"
         },
-        
+
         // Test 25: BIG board (13x13) - verify compatibility
         {
             ATTACK, SWORD, {{6, 5}, {6, 6}}, BIG,
@@ -1782,35 +1817,35 @@ void test_capturePieces()
         Game game;
         game.itsBoard = {cb(tc.boardSize), tc.boardSize};
         resetBoard(game.itsBoard.itsCells, tc.boardSize);
-        
+
         // Setup current player
         game.itsPlayer1.itsRole = ATTACK;
         game.itsPlayer2.itsRole = DEFENSE;
         game.itsCurrentPlayer = (tc.currentPlayer == ATTACK) ? &game.itsPlayer1 : &game.itsPlayer2;
-        
+
         // Setup board cells
         for (int i = 0; i < tc.setupCount; ++i) {
             const auto& setup = tc.setup[i];
             game.itsBoard.itsCells[setup.pos.itsRow][setup.pos.itsCol].itsCellType = setup.cellType;
             game.itsBoard.itsCells[setup.pos.itsRow][setup.pos.itsCol].itsPieceType = setup.pieceType;
         }
-        
+
         if (DISPLAY_BOARDS) {
             cout << "  Before move:" << endl;
             displayBoard(game.itsBoard);
             cout << "  Move: " << (char)(tc.move.itsStartPosition.itsRow + 'A') << (tc.move.itsStartPosition.itsCol + 1)
                  << "→" << (char)(tc.move.itsEndPosition.itsRow + 'A') << (tc.move.itsEndPosition.itsCol + 1) << endl;
         }
-        
+
         // Execute move and capture
         movePiece(game, tc.move);
         capturePieces(game, tc.move);
-        
+
         if (DISPLAY_BOARDS) {
             cout << "  After capture:" << endl;
             displayBoard(game.itsBoard);
         }
-        
+
         // Verify expected captures
         bool allCaptured = true;
         for (int i = 0; i < tc.captureCount; ++i) {
@@ -1820,7 +1855,7 @@ void test_capturePieces()
                 break;
             }
         }
-        
+
         // Verify expected non-captures
         bool allNonCaptured = true;
         for (int i = 0; i < tc.nonCaptureCount; ++i) {
@@ -1830,7 +1865,7 @@ void test_capturePieces()
                 break;
             }
         }
-        
+
         testNum++;
         if (allCaptured && allNonCaptured) {
             printTestResult(testNum, tc.description, true);
@@ -1843,7 +1878,7 @@ void test_capturePieces()
             printTestResult(testNum, tc.description, false, expected, actual);
             failed++;
         }
-        
+
         // Cleanup
         db(game.itsBoard.itsCells, tc.boardSize);
     }
@@ -1877,10 +1912,10 @@ void test_switchCurrentPlayer() {
         // Basic tests
         {false, 1, false, "Switch from Player1 to Player2"},                    // Test 1
         {false, 2, true,  "Switch from Player2 back to Player1"},               // Test 2
-        
+
         // Edge case
         {true,  1, true,  "Initial nullptr -> becomes Player1 after first switch"}, // Test 3
-        
+
         // Sequence tests
         {false, 10, true,  "10 toggles from Player1 -> ends on Player1 (even)"},   // Test 4
         {false, 5,  false, "5 toggles from Player1 -> ends on Player2 (odd)"},     // Test 5
@@ -1888,18 +1923,18 @@ void test_switchCurrentPlayer() {
 
     for (const auto& test : tests) {
         Game game;
-        
+
         // Initial setup
         game.itsCurrentPlayer = test.startWithNullptr ? nullptr : &game.itsPlayer1;
-        
+
         // Execute switches
         for (int j = 0; j < test.switchCount; ++j) {
             switchCurrentPlayer(game);
         }
-        
+
         // Determine expected result
         Player* expected = test.expectPlayer1 ? &game.itsPlayer1 : &game.itsPlayer2;
-        
+
         // Verify result
         testNum++;
         if (game.itsCurrentPlayer == expected) {
@@ -1907,7 +1942,7 @@ void test_switchCurrentPlayer() {
             pass++;
         } else {
             string expectedStr = test.expectPlayer1 ? "Player1" : "Player2";
-            string actualStr = (game.itsCurrentPlayer == &game.itsPlayer1) ? "Player1" : 
+            string actualStr = (game.itsCurrentPlayer == &game.itsPlayer1) ? "Player1" :
                               (game.itsCurrentPlayer == &game.itsPlayer2) ? "Player2" : "nullptr";
             printTestResult(testNum, test.description, false, expectedStr, actualStr);
             failed++;
@@ -1930,7 +1965,7 @@ void test_switchCurrentPlayer() {
         testNum++;
         bool rolesIntact = (game.itsPlayer1.itsRole == ATTACK && game.itsPlayer2.itsRole == DEFENSE);
         bool namesIntact = (game.itsPlayer1.itsName == "Alice" && game.itsPlayer2.itsName == "Bob");
-        
+
         if (rolesIntact && namesIntact) {
             printTestResult(testNum, "Switching does not mutate players' roles or names", true);
             pass++;
@@ -1976,17 +2011,17 @@ void test_isSwordLeft()
         {LITTLE, "only_king", false, "Only KING on board → no swords"},
         {LITTLE, "only_shield", false, "Only SHIELD pieces → no swords"},
         {LITTLE, "single_sword", true, "Single SWORD at center → has swords"},
-        
+
         // === LEVEL 2: Various positions ===
         {LITTLE, "sword_corner", true, "SWORD in corner (0,0) → has swords"},
         {LITTLE, "sword_edge", true, "SWORD at board edge → has swords"},
         {LITTLE, "sword_near_fortress", true, "SWORD near FORTRESS → has swords"},
-        
+
         // === LEVEL 3: Multiple pieces ===
         {LITTLE, "multiple_swords", true, "Multiple SWORDs on board → has swords"},
         {LITTLE, "mixed_pieces_with_sword", true, "SWORD + SHIELD + KING → has swords"},
         {LITTLE, "mixed_pieces_no_sword", false, "SHIELD + KING (no SWORD) → no swords"},
-        
+
         // === LEVEL 4: Edge cases ===
         {LITTLE, "sword_removed", false, "SWORD added then removed → no swords"},
         {BIG, "big_board_no_sword", false, "BIG board (13×13) with no SWORD → no swords"},
@@ -2052,7 +2087,7 @@ void test_isSwordLeft()
         // Execute test
         testNum++;
         bool result = isSwordLeft({b, size});
-        
+
         if (result == test.expectSwordPresent) {
             printTestResult(testNum, test.description, true);
             pass++;
@@ -2103,23 +2138,23 @@ void test_getKingPosition()
         {LITTLE, 0, 0, 0, 0, false, -1, -1, "LITTLE - King at corner (A1)"},
         {LITTLE, 10, 10, 10, 10, false, -1, -1, "LITTLE - King at opposite corner (K11)"},
         {LITTLE, 4, 4, 4, 4, false, -1, -1, "LITTLE - King at custom position (E5)"},
-        
+
         // === LEVEL 2: Various positions on LITTLE ===
         {LITTLE, 0, 5, 0, 5, false, -1, -1, "LITTLE - King at top edge (A6)"},
         {LITTLE, 10, 5, 10, 5, false, -1, -1, "LITTLE - King at bottom edge (K6)"},
         {LITTLE, 5, 0, 5, 0, false, -1, -1, "LITTLE - King at left edge (F1)"},
         {LITTLE, 5, 10, 5, 10, false, -1, -1, "LITTLE - King at right edge (F11)"},
-        
+
         // === LEVEL 3: Basic positions on BIG (13×13) ===
         {BIG, 6, 6, 6, 6, false, -1, -1, "BIG - King at center (G7)"},
         {BIG, 0, 0, 0, 0, false, -1, -1, "BIG - King at corner (A1)"},
         {BIG, 12, 7, 12, 7, false, -1, -1, "BIG - King at bottom (M8)"},
         {BIG, 4, 4, 4, 4, false, -1, -1, "BIG - King at custom position (E5)"},
-        
+
         // === LEVEL 4: Edge cases ===
         {LITTLE, -1, -1, -1, -1, false, -1, -1, "No king on board → returns (-1,-1)"},
         {LITTLE, 0, 3, 0, 3, true, 5, 5, "Multiple kings → returns first found (A4)"},
-        
+
         // === LEVEL 5: KING with other pieces (don't confuse) ===
         {LITTLE, 3, 3, 3, 3, false, -1, -1, "KING at D4 with SWORD at A1 → finds KING"},
         {LITTLE, 7, 7, 7, 7, false, -1, -1, "KING at H8 with SHIELD at corners → finds KING"},
@@ -2138,7 +2173,7 @@ void test_getKingPosition()
         if (test.kingRow >= 0 && test.kingCol >= 0) {
             b.itsCells[test.kingRow][test.kingCol].itsPieceType = KING;
         }
-        
+
         if (test.multipleKings && test.king2Row >= 0 && test.king2Col >= 0) {
             b.itsCells[test.king2Row][test.king2Col].itsPieceType = KING;
         }
@@ -2171,7 +2206,7 @@ void test_getKingPosition()
 
         // Execute test
         Position posToTest = getKingPosition(b);
-        
+
         testNum++;
         if (posToTest.itsRow == test.expectedRow && posToTest.itsCol == test.expectedCol) {
             printTestResult(testNum, test.description, true);
@@ -2183,13 +2218,13 @@ void test_getKingPosition()
             } else {
                 expected = string(1, (char)(test.expectedRow + 'A')) + to_string(test.expectedCol + 1);
             }
-            
+
             if (posToTest.itsRow == -1 && posToTest.itsCol == -1) {
                 actual = "(-1,-1)";
             } else {
                 actual = string(1, (char)(posToTest.itsRow + 'A')) + to_string(posToTest.itsCol + 1);
             }
-            
+
             printTestResult(testNum, test.description, false, expected, actual);
             failed++;
         }
@@ -2230,31 +2265,31 @@ void test_isKingEscaped()
         {LITTLE, 5, 5, false, false, "LITTLE - King at center → not escaped"},
         {LITTLE, 3, 3, false, false, "LITTLE - King at D4 → not escaped"},
         {LITTLE, 7, 7, false, false, "LITTLE - King at H8 → not escaped"},
-        
+
         // === LEVEL 2: KING escaped - on FORTRESS corners LITTLE ===
         {LITTLE, 0, 0, true, true, "LITTLE - King on FORTRESS A1 → escaped"},
         {LITTLE, 0, 10, true, true, "LITTLE - King on FORTRESS A11 → escaped"},
         {LITTLE, 10, 0, true, true, "LITTLE - King on FORTRESS K1 → escaped"},
         {LITTLE, 10, 10, true, true, "LITTLE - King on FORTRESS K11 → escaped"},
-        
+
         // === LEVEL 3: KING not escaped - near FORTRESS but not on it ===
         {LITTLE, 0, 1, false, false, "LITTLE - King adjacent to FORTRESS (A2) → not escaped"},
         {LITTLE, 1, 0, false, false, "LITTLE - King adjacent to FORTRESS (B1) → not escaped"},
         {LITTLE, 1, 1, false, false, "LITTLE - King diagonal to FORTRESS (B2) → not escaped"},
-        
+
         // === LEVEL 4: KING not escaped - on CASTLE (center) ===
         {LITTLE, 5, 5, false, false, "LITTLE - King on CASTLE center → not escaped"},
-        
+
         // === LEVEL 5: KING not escaped - normal positions BIG ===
         {BIG, 6, 6, false, false, "BIG - King at center → not escaped"},
         {BIG, 3, 3, false, false, "BIG - King at D4 → not escaped"},
-        
+
         // === LEVEL 6: KING escaped - on FORTRESS corners BIG ===
         {BIG, 0, 0, true, true, "BIG - King on FORTRESS A1 → escaped"},
         {BIG, 0, 12, true, true, "BIG - King on FORTRESS A13 → escaped"},
         {BIG, 12, 0, true, true, "BIG - King on FORTRESS M1 → escaped"},
         {BIG, 12, 12, true, true, "BIG - King on FORTRESS M13 → escaped"},
-        
+
         // === LEVEL 7: Edge cases ===
         {LITTLE, -1, -1, false, false, "No king on board → not escaped"},
     };
@@ -2271,7 +2306,7 @@ void test_isKingEscaped()
         b.itsCells[0][size-1].itsCellType = FORTRESS;
         b.itsCells[size-1][0].itsCellType = FORTRESS;
         b.itsCells[size-1][size-1].itsCellType = FORTRESS;
-        
+
         // Setup CASTLE at center (optional for clarity)
         int center = (size - 1) / 2;
         b.itsCells[center][center].itsCellType = CASTLE;
@@ -2286,7 +2321,7 @@ void test_isKingEscaped()
         // Execute test
         testNum++;
         bool result = isKingEscaped(b);
-        
+
         if (result == test.expectEscaped) {
             printTestResult(testNum, test.description, true);
             pass++;
@@ -2353,7 +2388,7 @@ void test_isKingCapturedSimple()
                 cells[0][3].itsPieceType = SWORD;  // right
                 // up is border (hostile)
             }},
-        
+
         {2, 2, true, "3 SWORD + CASTLE",
             [](Cell** cells, int size) {
                 (void)size;
@@ -2363,7 +2398,7 @@ void test_isKingCapturedSimple()
                 cells[2][1].itsPieceType = SWORD;  // left
                 cells[2][3].itsCellType = CASTLE;  // right (hostile)
             }},
-        
+
         {4, 4, true, "3 SWORD + FORTRESS",
             [](Cell** cells, int size) {
                 (void)size;
@@ -2384,7 +2419,7 @@ void test_isKingCapturedSimple()
                 cells[size-1][1].itsCellType = FORTRESS; // left (hostile)
                 // down is border (hostile)
             }},
-        
+
         {0, 5, true, "2 SWORD + border + CASTLE (top edge)",
             [](Cell** cells, int size) {
                 (void)size;
@@ -2394,7 +2429,7 @@ void test_isKingCapturedSimple()
                 cells[0][6].itsCellType = CASTLE;  // right (hostile)
                 // up is border (hostile)
             }},
-        
+
         {5, 5, true, "2 SWORD + FORTRESS + CASTLE (no borders)",
             [](Cell** cells, int size) {
                 (void)size;
@@ -2426,7 +2461,7 @@ void test_isKingCapturedSimple()
                 cells[2][1].itsPieceType = SWORD;  // left
                 cells[2][3].itsPieceType = SWORD;  // right
             }},
-        
+
         {0, 2, false, "2 SWORD + border + SHIELD → not captured",
             [](Cell** cells, int size) {
                 (void)size;
@@ -2436,7 +2471,7 @@ void test_isKingCapturedSimple()
                 cells[0][1].itsPieceType = SHIELD; // left (friendly)
                 // up is border (hostile) → only 3 hostile
             }},
-        
+
         {5, 5, false, "2 SWORD + FORTRESS + SHIELD → not captured",
             [](Cell** cells, int size) {
                 (void)size;
@@ -2464,7 +2499,7 @@ void test_isKingCapturedSimple()
     for (const auto& test : tests) {
         testNum++;
         resetBoard(b.itsCells, size);
-        
+
         // Configuration du plateau via lambda
         test.setupBoard(b.itsCells, size);
 
@@ -2472,7 +2507,7 @@ void test_isKingCapturedSimple()
 
         // Test execution
         bool result = isKingCapturedSimple(b);
-        
+
         if (result == test.expectCaptured) {
             printTestResult(testNum, test.description, true);
             pass++;
@@ -3225,7 +3260,7 @@ void printTestHeader(const string& testName) {
  * @param expected Expected value (optional)
  * @param actual Actual value (optional)
  */
-void printTestResult(int testNum, const string& description, bool passed, 
+void printTestResult(int testNum, const string& description, bool passed,
                      const string& expected, const string& actual) {
     cout << "  " << COLOR_CYAN << "[Test " << testNum << "]" << COLOR_RESET << " ";
     if (passed) {
@@ -3237,6 +3272,18 @@ void printTestResult(int testNum, const string& description, bool passed,
         }
         cout << endl;
     }
+}
+
+/**
+ * @brief Prints a test exception with formatting.
+ * @param testNum Test number
+ * @param description Description of the test
+ * @param exceptionMsg Exception message
+ */
+void printTestException(int testNum, const string& description, const string& exceptionMsg) {
+    cout << "  " << COLOR_CYAN << "[Test " << testNum << "]" << COLOR_RESET << " ";
+    cout << COLOR_RED << COLOR_BOLD << description << ": ⚠ CRASH/EXCEPTION" << COLOR_RESET << endl;
+    cout << "    " << COLOR_YELLOW << "Exception: " << exceptionMsg << COLOR_RESET << endl;
 }
 
 /**

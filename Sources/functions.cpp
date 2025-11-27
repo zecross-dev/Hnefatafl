@@ -9,6 +9,7 @@
  * @author JMB and zecross-dev - IUT Informatique La Rochelle
  * @date 10/11/2025
  */
+#include <charconv>
 #include <complex>
 #ifdef _WIN32
 #include <windows.h>
@@ -122,21 +123,21 @@ bool clearConsole() {
  */
 void displayHnefataflLogo() {
     clearConsole();
-    cout << "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾" << endl;
-    cout << "|     ■           ■                                                                ■■■■■■  ■■■■■■                                                           |" << endl;
-    cout << "|      ■■       ■■     ■■             ■■■■■■■■■       ■■■■■■■■■■      ■■■       ■■■■   ■■■■■■   ■■■■     ■■■              ■■■■■■■■■       ■■■■■             |" << endl;
-    cout << "|      ■■■     ■■■     ■■■■■■■■■       ■■■■    ■■      ■■■      ■■    ■■■■■   ■■        ■■■        ■■    ■■■■■             ■■■      ■■      ■■■             |" << endl;
-    cout << "|      ■■       ■■     ■■■■   ■■■    ■■■      ■      ■■■       ■     ■■■  ■■■            ■■■            ■■■  ■■■         ■■■       ■        ■■■             |" << endl;
-    cout << "|      ■■       ■■     ■■■     ■■■    ■■■             ■■■            ■■■   ■■■           ■■■            ■■■   ■■■         ■■■               ■■■             |" << endl;
-    cout << "|      ■■■     ■■■      ■■■     ■■■   ■■■             ■■■           ■■■    ■■■            ■■■          ■■■    ■■■         ■■■              ■■■              |" << endl;
-    cout << "|     ■■■■■   ■■■■■     ■■■     ■■■   ■■■■           ■■■■          ■■■     ■■■  ■■        ■■■         ■■■     ■■■  ■■    ■■■■              ■■■              |" << endl;
-    cout << "|    ■■■■■■■■■■■■■■     ■■■     ■■■  ■■■■■■ ■■      ■■■■■■ ■■     ■■■■■   ■■■■■■ ■■      ■■■         ■■■■■   ■■■■■■ ■■   ■■■■■■ ■■         ■■■              |" << endl;
-    cout << "|      ■■■■   ■■■■      ■■■     ■■■   ■■■             ■■■         ■■■  ■■■■  ■■■        ■■■          ■■■  ■■■■  ■■■       ■■■            ■■■                |" << endl;
-    cout << "|       ■■     ■■      ■■■     ■■■    ■■■             ■■■         ■■■      ■■■         ■■■           ■■■        ■■■       ■■■          ■■■                  |" << endl;
-    cout << "|      ■■■     ■■■     ■■■     ■■■    ■■■      ■      ■■■         ■■■      ■■■          ■■■          ■■■      ■■■         ■■■        ■■■                    |" << endl;
-    cout << "|      ■■       ■■     ■■     ■■      ■■■     ■■      ■■■         ■■■      ■■■       ■   ■■■  ■      ■■■      ■■■         ■■■       ■■■               ■■■   |" << endl;
-    cout << "|     ■           ■    ■     ■      ■■■■■■■■■■■     ■■■■■           ■■■      ■■■      ■■■■■■■■        ■■■      ■■■      ■■■■■        ■■■■■■■■■■■■■■■■■■     |" << endl;
-    cout << "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾" << endl;
+    cout << "╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗" << endl;
+    cout << "║     ■           ■                                                                ■■■■■■  ■■■■■■                                                           ║" << endl;
+    cout << "║      ■■       ■■     ■■             ■■■■■■■■■       ■■■■■■■■■■      ■■■       ■■■■   ■■■■■■   ■■■■     ■■■              ■■■■■■■■■       ■■■■■             ║" << endl;
+    cout << "║      ■■■     ■■■     ■■■■■■■■■       ■■■■    ■■      ■■■      ■■    ■■■■■   ■■        ■■■        ■■    ■■■■■             ■■■      ■■      ■■■             ║" << endl;
+    cout << "║      ■■       ■■     ■■■■   ■■■    ■■■      ■      ■■■       ■     ■■■  ■■■            ■■■            ■■■  ■■■         ■■■       ■        ■■■             ║" << endl;
+    cout << "║      ■■       ■■     ■■■     ■■■    ■■■             ■■■            ■■■   ■■■           ■■■            ■■■   ■■■         ■■■               ■■■             ║" << endl;
+    cout << "║      ■■■     ■■■      ■■■     ■■■   ■■■             ■■■           ■■■    ■■■            ■■■          ■■■    ■■■         ■■■              ■■■              ║" << endl;
+    cout << "║     ■■■■■   ■■■■■     ■■■     ■■■   ■■■■           ■■■■          ■■■     ■■■  ■■        ■■■         ■■■     ■■■  ■■    ■■■■              ■■■              ║" << endl;
+    cout << "║    ■■■■■■■■■■■■■■     ■■■     ■■■  ■■■■■■ ■■      ■■■■■■ ■■     ■■■■■   ■■■■■■ ■■      ■■■         ■■■■■   ■■■■■■ ■■   ■■■■■■ ■■         ■■■              ║" << endl;
+    cout << "║      ■■■■   ■■■■      ■■■     ■■■   ■■■             ■■■         ■■■  ■■■■  ■■■        ■■■          ■■■  ■■■■  ■■■       ■■■            ■■■                ║" << endl;
+    cout << "║       ■■     ■■      ■■■     ■■■    ■■■             ■■■         ■■■      ■■■         ■■■           ■■■        ■■■       ■■■          ■■■                  ║" << endl;
+    cout << "║      ■■■     ■■■     ■■■     ■■■    ■■■      ■      ■■■         ■■■      ■■■          ■■■          ■■■      ■■■         ■■■        ■■■                    ║" << endl;
+    cout << "║      ■■       ■■     ■■     ■■      ■■■     ■■      ■■■         ■■■      ■■■       ■   ■■■  ■      ■■■      ■■■         ■■■       ■■■               ■■■   ║" << endl;
+    cout << "║     ■           ■    ■     ■      ■■■■■■■■■■■     ■■■■■           ■■■      ■■■      ■■■■■■■■        ■■■      ■■■      ■■■■■        ■■■■■■■■■■■■■■■■■■     ║" << endl;
+    cout << "╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝" << endl;
     }
 
 // ============================================================================
@@ -240,24 +241,30 @@ void deleteBoard(Board& aBoard) {
 void displayBoard(const Board& aBoard) {
     const int SIZE = aBoard.itsSize;
     const string CHARBOARD = "ABCDEFGHIJKLM";
-    cout << "   |";
+    cout << "    ";
+
     for (int column = 0 ; column<SIZE ; column++ ) {
         cout << "  " << column +1 ;
         if (column>=9) {
-            cout <<" |";
+            cout <<"  ";
         }
         else {
-            cout <<"  |";
+            cout <<"   ";
         }
     }
     cout <<endl;
-    cout<<"   +";
+    cout<<"   ╬";
     for (int column = 0 ; column<SIZE ; column++ ) {
-        cout << "─────+";
+        if (column != SIZE-1) {
+            cout << "═════╬";
+        }
+        else {
+            cout << "═════╣";
+        }
     }
     cout <<endl;
     for (int line = 0 ; line<SIZE ; line++) {
-        cout << " " << CHARBOARD[line] << " |";
+        cout << " " << CHARBOARD[line] << " ║";
         for (int column = 0 ; column<SIZE ; column++) {
             //take the enums as integers
             CellType pos = aBoard.itsCells[line][column].itsCellType;
@@ -284,11 +291,27 @@ void displayBoard(const Board& aBoard) {
             else if (piece == SWORD) {
                 cout <<"⚔";
             }
-            cout << "  |";
+            cout << "  ║";
         }
-        cout<< endl << "   +";
+        if (line != SIZE-1) {
+            cout<< endl << "   ╬";
+        }
+        else {
+            cout<< endl << "   ╩";
+        }
         for (int column = 0 ; column<SIZE ; column++ ) {
-            cout << "─────+";
+            if (column != SIZE-1 && line != SIZE-1) {
+                cout << "═════╬";
+            }
+            else if (column == SIZE-1 && line != SIZE-1) {
+                cout << "═════╣";
+            }
+            else if (column != SIZE-1 && line == SIZE-1) {
+                cout <<"═════╩";
+            }
+            else {
+                cout <<"═════╝";
+            }
         }
         cout << endl;
     }
@@ -309,20 +332,23 @@ void initializeBoard(Board& aBoard) {
     //set cellType and set piece to NONE
     for (int line = 0 ; line < SIZE ; line++) {
         for (int column = 0 ; column < SIZE ; column++) {
-            //set castle and king in center
-            if (line == SIZE/2 && column == SIZE/2) {
-                aBoard.itsCells[line][column].itsCellType  = CASTLE;
-                aBoard.itsCells[line][column].itsPieceType = KING;
-            }
-            //set fortress in corners
-            else if ((line == 0 || line == SIZE-1 ) && (column== 0 || column == SIZE-1 )){
-                aBoard.itsCells[line][column].itsCellType  = FORTRESS;
-                aBoard.itsCells[line][column].itsPieceType = NONE;
-            }
-            //set all the other pieces at normal case and none piece
-            else {
-                aBoard.itsCells[line][column].itsCellType  = NORMAL;
-                aBoard.itsCells[line][column].itsPieceType = NONE;
+            //test if the coords exist
+            if (aBoard.itsCells != nullptr){
+                //set castle and king in center
+                if (line == SIZE/2 && column == SIZE/2) {
+                    aBoard.itsCells[line][column].itsCellType  = CASTLE;
+                    aBoard.itsCells[line][column].itsPieceType = KING;
+                }
+                //set fortress in corners
+                else if ((line == 0 || line == SIZE-1 ) && (column== 0 || column == SIZE-1 )){
+                    aBoard.itsCells[line][column].itsCellType  = FORTRESS;
+                    aBoard.itsCells[line][column].itsPieceType = NONE;
+                }
+                //set all the other pieces at normal case and none piece
+                else {
+                    aBoard.itsCells[line][column].itsCellType  = NORMAL;
+                    aBoard.itsCells[line][column].itsPieceType = NONE;
+                }
             }
         }
     }
@@ -331,29 +357,28 @@ void initializeBoard(Board& aBoard) {
     if (SIZE == 11) {
         for (int line = 0 ; line < SIZE ; line++) {
             for (int column = 0 ; column < SIZE; column++) {
+                if (aBoard.itsCells != nullptr){
+                    //place the shields around the king
+                    if (line == LITTLE_CENTER && column != LITTLE_CENTER && column >= LITTLE_CENTER-2 && column <= LITTLE_CENTER+2) {
+                        aBoard.itsCells[line][column].itsPieceType = SHIELD;
+                        //place the invert coords pieces for optimisation
+                        aBoard.itsCells[column][line].itsPieceType = SHIELD;
+                    }
+                    //place shields on the diagonals of the king
+                    if ((line == LITTLE_CENTER-1 || line == LITTLE_CENTER +1) && (column == LITTLE_CENTER-1 || column == LITTLE_CENTER+1)) {
+                        aBoard.itsCells[line][column].itsPieceType = SHIELD;
+                    }
 
-                //place the shields around the king
-                if (line == LITTLE_CENTER && column != LITTLE_CENTER && column >= LITTLE_CENTER-2 && column <= LITTLE_CENTER+2) {
-                    aBoard.itsCells[line][column].itsPieceType = SHIELD;
-                    //place the invert coords pieces for optimisation
-                    aBoard.itsCells[column][line].itsPieceType = SHIELD;
-                }
-                //place shields on the diagonals of the king
-                if ((line == LITTLE_CENTER-1 || line == LITTLE_CENTER +1) && (column == LITTLE_CENTER-1 || column == LITTLE_CENTER+1)) {
-                    aBoard.itsCells[line][column].itsPieceType = SHIELD;
-                }
+                    //place the swords on the board
+                    if ((line == 0 || line == SIZE -1 )&& column > 2 && column < 8) {
+                        aBoard.itsCells[line][column].itsPieceType = SWORD;
+                        aBoard.itsCells[column][line].itsPieceType = SWORD;
+                    }
 
-
-
-                //place the swords on the board
-                if ((line == 0 || line == SIZE -1 )&& column > 2 && column < 8) {
-                    aBoard.itsCells[line][column].itsPieceType = SWORD;
-                    aBoard.itsCells[column][line].itsPieceType = SWORD;
-                }
-
-                if (line == LITTLE_CENTER && (column == 1 || column == 9)) {
-                    aBoard.itsCells[line][column].itsPieceType = SWORD;
-                    aBoard.itsCells[column][line].itsPieceType = SWORD;
+                    if (line == LITTLE_CENTER && (column == 1 || column == 9)) {
+                        aBoard.itsCells[line][column].itsPieceType = SWORD;
+                        aBoard.itsCells[column][line].itsPieceType = SWORD;
+                    }
                 }
             }
         }
@@ -364,25 +389,26 @@ void initializeBoard(Board& aBoard) {
     else if (SIZE == 13) {
         for (int line = 0 ; line < SIZE ; line++) {
             for (int column = 0 ; column < SIZE; column++) {
-                //place the shields around the king
-                if (line == BIG_CENTER && column != BIG_CENTER && column >= BIG_CENTER-3 && column <= BIG_CENTER+3) {
-                    aBoard.itsCells[line][column].itsPieceType = SHIELD;
-                    //place the invert coords pieces for optimisation
-                    aBoard.itsCells[column][line].itsPieceType = SHIELD;
+                if (aBoard.itsCells != nullptr){
+                    //place the shields around the king
+                    if (line == BIG_CENTER && column != BIG_CENTER && column >= BIG_CENTER-3 && column <= BIG_CENTER+3) {
+                        aBoard.itsCells[line][column].itsPieceType = SHIELD;
+                        //place the invert coords pieces for optimisation
+                        aBoard.itsCells[column][line].itsPieceType = SHIELD;
+                    }
+
+
+                    //place the swords on the board
+                    if ((line == 0 || line == SIZE -1 )&& column > 3 && column < 9) {
+                        aBoard.itsCells[line][column].itsPieceType = SWORD;
+                        aBoard.itsCells[column][line].itsPieceType = SWORD;
+                    }
+
+                    if (line == BIG_CENTER && (column == 1 || column == 11)) {
+                        aBoard.itsCells[line][column].itsPieceType = SWORD;
+                        aBoard.itsCells[column][line].itsPieceType = SWORD;
+                    }
                 }
-
-
-                //place the swords on the board
-                if ((line == 0 || line == SIZE -1 )&& column > 3 && column < 9) {
-                    aBoard.itsCells[line][column].itsPieceType = SWORD;
-                    aBoard.itsCells[column][line].itsPieceType = SWORD;
-                }
-
-                if (line == BIG_CENTER && (column == 1 || column == 11)) {
-                    aBoard.itsCells[line][column].itsPieceType = SWORD;
-                    aBoard.itsCells[column][line].itsPieceType = SWORD;
-                }
-
             }
         }
     }
@@ -402,7 +428,14 @@ void initializeBoard(Board& aBoard) {
  * @return `true` if position is within bounds, `false` otherwise.
  */
 bool isValidPosition(const Position& aPos, const Board& aBoard) {
-    // TODO: Implement position validation
+    const int SIZE = aBoard.itsSize;
+
+    cout << aPos.itsCol <<"  "<< aPos.itsRow << endl;
+    //test if position is valid
+    if (aPos.itsCol>=0 && aPos.itsCol<SIZE && aPos.itsRow>=0 && aPos.itsRow<SIZE) {
+        return true;
+    }
+    cout << "invalid position";
     return false;
 }
 
@@ -418,10 +451,41 @@ bool isValidPosition(const Position& aPos, const Board& aBoard) {
  * @param aBoard The game board for bounds validation.
  * @return `true` if input valid and position updated, `false` otherwise.
  */
-bool getPositionFromInput(Position& aPosition, const Board& aBoard)
-{
-    // TODO: Implement position input parsing and validation
-    return false;
+bool getPositionFromInput(Position& aPosition, const Board& aBoard){
+    const int SIZE = aBoard.itsSize;
+    const int CHARMAJ = 65;
+    const int CHARMIN = 97;
+    bool validSelection = false;
+    string pos;
+    do {
+        pos ="";
+        cout << "Select a position :  ";
+        cin >> pos;
+        if (pos.length()!=2 && pos.length()!=3) {
+            cout << endl << "Error of position format the good format is : letter + number" << endl << "exemple : A1";
+            return false;
+        }
+        int ftCoord = pos[0];
+        if (ftCoord <CHARMIN) {
+            ftCoord -= CHARMAJ;
+        }
+        else {
+            ftCoord -= CHARMIN;
+        }
+        int ndCoord;
+
+        if (pos.length()==2) {
+            ndCoord = pos[1]-49;
+        }
+        else {
+            ndCoord = (pos[1]-48)*10 + pos[2]-49;
+        }
+
+        aPosition.itsRow = ftCoord;
+        aPosition.itsCol = ndCoord;
+        validSelection = isValidPosition(aPosition , aBoard);
+    }while (validSelection == false);
+    return true;
 }
 
 

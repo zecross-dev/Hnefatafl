@@ -6,7 +6,7 @@
  * This file contains the implementation of the Hnefatafl game, including setup, gameplay, and outcome determination.
  * It also provides a testing suite for various game functions.
  *
- * @author JMB - IUT Informatique La Rochelle
+ * @author JMB and zecross-dev- IUT Informatique La Rochelle
  * @date 10/11/2025
  */
 
@@ -44,6 +44,8 @@ void playGame()
     displayHnefataflLogo();
     initializeBoard(gameBoard);
     displayBoard(gameBoard);
+    Position pos;
+    getPositionFromInput(pos ,gameBoard);
     // Hint: Create a Game structure, configure terminal, get players, create board,
     // run game loop until finished, display winner, and clean up memory
 }
@@ -113,8 +115,6 @@ void launchTests(){
  * @return 0 for successful execution.
  */
 int main() {
-
-
     // Uncomment the line below to run tests
     launchTests();
     // Start the game
