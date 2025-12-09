@@ -182,8 +182,7 @@ bool chooseSizeBoard(BoardSize& aBoardSize)
  * @param aBoard Reference to the Board object (`itsSize` must be set).
  * @return `true` if successful, `false` on allocation failure or invalid input.
  */
-bool createBoard(Board& aBoard)
-{
+bool createBoard(Board& aBoard) {
     const int SIZE = aBoard.itsSize;
     // dont do if size is null
     if ( SIZE == 0 ) {
@@ -213,14 +212,12 @@ bool createBoard(Board& aBoard)
  */
 void deleteBoard(Board& aBoard) {
     const int SIZE = aBoard.itsSize;
-
     for (int line = 0; line < SIZE; line++) {
         //free each row of the table
         if (aBoard.itsCells != nullptr) {
             delete[] aBoard.itsCells[line] ;
             aBoard.itsCells[line] = nullptr;
         }
-
     }
     //free all the table
     if (aBoard.itsCells != nullptr) {
@@ -382,9 +379,6 @@ void initializeBoard(Board& aBoard) {
                 }
             }
         }
-
-
-
     }
     else if (SIZE == 13) {
         for (int line = 0 ; line < SIZE ; line++) {
@@ -396,14 +390,11 @@ void initializeBoard(Board& aBoard) {
                         //place the invert coords pieces for optimisation
                         aBoard.itsCells[column][line].itsPieceType = SHIELD;
                     }
-
-
                     //place the swords on the board
                     if ((line == 0 || line == SIZE -1 )&& column > 3 && column < 9) {
                         aBoard.itsCells[line][column].itsPieceType = SWORD;
                         aBoard.itsCells[column][line].itsPieceType = SWORD;
                     }
-
                     if (line == BIG_CENTER && (column == 1 || column == 11)) {
                         aBoard.itsCells[line][column].itsPieceType = SWORD;
                         aBoard.itsCells[column][line].itsPieceType = SWORD;
@@ -452,9 +443,8 @@ bool isValidPosition(const Position& aPos, const Board& aBoard) {
  * @return `true` if input valid and position updated, `false` otherwise.
  */
 bool getPositionFromInput(Position& aPosition, const Board& aBoard){
-    const int SIZE = aBoard.itsSize;
-    const int CHARMAJ = 65;
-    const int CHARMIN = 97;
+    const int CHARMAJ = 'A';
+    const int CHARMIN = 'a';
     bool validSelection = false;
     string pos;
     do {
@@ -480,7 +470,6 @@ bool getPositionFromInput(Position& aPosition, const Board& aBoard){
         else {
             ndCoord = (pos[1]-48)*10 + pos[2]-49;
         }
-
         aPosition.itsRow = ftCoord;
         aPosition.itsCol = ndCoord;
         validSelection = isValidPosition(aPosition , aBoard);
@@ -500,8 +489,8 @@ bool getPositionFromInput(Position& aPosition, const Board& aBoard){
  * @return `true` if cell is empty, `false` if it contains a piece.
  */
 bool isEmptyCell(const Board& aBoard, const Position& aPos) {
-    // TODO: Implement empty cell check
-    return false;
+    //use ternary operator for test if piece type is NONE (if yes return true else return false)
+    return aBoard.itsCells[aPos.itsRow][aPos.itsCol].itsPieceType ? NONE : true;
 }
 
 // ============================================================================
@@ -519,10 +508,76 @@ bool isEmptyCell(const Board& aBoard, const Position& aPos) {
  * @param aMove The move to validate (start and end positions).
  * @return `true` if move is valid, `false` otherwise.
  */
-bool isValidMovement(const Game& aGame, const Move& aMove)
-{
-    // TODO: Implement movement validation
-    return false;
+bool isValidMovement(const Game& aGame, const Move& aMove) {
+    const int SIZE = aGame.itsBoard.itsSize;
+    Player *player=aGame.itsCurrentPlayer;
+    //test if the position is on the bounds of the board
+    if (aMove.itsEndPosition.itsRow < 0 || aMove.itsEndPosition.itsRow >= SIZE || aMove.itsEndPosition.itsCol < 0 || aMove.itsEndPosition.itsCol >= SIZE ||
+        aMove.itsStartPosition.itsRow<0 ||aMove.itsStartPosition.itsRow >=SIZE || aMove.itsStartPosition.itsCol < 0 || aMove.itsStartPosition.itsCol >=SIZE)
+    {
+        return false;
+    }
+    //test if player try to moove a right piece
+    if (player->itsRole == ATTACK && aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType != SWORD )
+    {
+       return false;
+    }
+    if (player->itsRole == DEFENSE && (aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType == SWORD
+       || aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType == NONE ))
+    {
+        return false;
+    }
+
+    //test if a other piece than king try to escape or enter in castle
+    if  (aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType !=KING &&
+        (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
+         aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol].itsCellType == CASTLE)) {
+        return false;
+        }
+
+    if (aMove.itsEndPosition.itsCol == aMove.itsStartPosition.itsCol &&  aMove.itsEndPosition.itsRow == aMove.itsStartPosition.itsRow) {
+        return false;
+    }
+    int min,max;
+    //test the movement on columns
+    if (aMove.itsEndPosition.itsCol == aMove.itsStartPosition.itsCol) {
+        if (aMove.itsStartPosition.itsRow < aMove.itsEndPosition.itsRow) {
+            min = aMove.itsStartPosition.itsRow;
+            max = aMove.itsEndPosition.itsRow;
+        }
+        else {
+            max = aMove.itsStartPosition.itsRow;
+            min = aMove.itsEndPosition.itsRow;
+        }
+        //loop for test in the row if a piece block
+        for (int i = min+1 ; i < max ; i++) {
+            if (aGame.itsBoard.itsCells[i][aMove.itsStartPosition.itsCol].itsPieceType != NONE
+                || aGame.itsBoard.itsCells[i][aMove.itsStartPosition.itsCol].itsCellType != NORMAL) {
+                return false;
+            }
+        }
+    }
+    else if (aMove.itsEndPosition.itsRow == aMove.itsStartPosition.itsRow) {
+        if (aMove.itsStartPosition.itsCol < aMove.itsEndPosition.itsCol) {
+            min = aMove.itsStartPosition.itsCol;
+            max = aMove.itsEndPosition.itsCol;
+        }
+        else {
+            max = aMove.itsStartPosition.itsCol;
+            min = aMove.itsEndPosition.itsCol;
+        }
+        for (int i = min+1 ; i< max ; i++) {
+            if (aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][i].itsPieceType != NONE
+                || aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][i].itsCellType != NORMAL) {
+                return false;
+            }
+        }
+
+    }
+    else {
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -536,9 +591,10 @@ bool isValidMovement(const Game& aGame, const Move& aMove)
  * @note Assumes move is valid. Use `isValidMovement()` first to validate.
  */
 void movePiece(Game& aGame, const Move& aMove) {
-    // TODO: Implement piece movement
+    PieceType piece = aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType;
+    aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType = NONE;
+    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol].itsPieceType = piece;
 }
-
 /**
  * @brief Removes captured pieces from the board.
  *
