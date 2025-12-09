@@ -716,9 +716,13 @@ void capturePieces(Game& aGame, const Move& aMove) {
  *
  * @param aGame Reference to the Game object (updates `itsCurrentPlayer`).
  */
-void switchCurrentPlayer(Game& aGame)
-{
-    // TODO: Implement player switch
+void switchCurrentPlayer(Game& aGame) {
+    if (aGame.itsCurrentPlayer == &aGame.itsPlayer1){
+        aGame.itsCurrentPlayer = &aGame.itsPlayer2;
+    }
+    else {
+        aGame.itsCurrentPlayer = &aGame.itsPlayer1;
+    }
 }
 
 // ============================================================================
