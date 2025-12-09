@@ -607,7 +607,105 @@ void movePiece(Game& aGame, const Move& aMove) {
  * @note Assumes move already validated and executed. Modifies board to remove captured pieces.
  */
 void capturePieces(Game& aGame, const Move& aMove) {
-    // TODO: Implement capture logic
+    const int SIZE = aGame.itsBoard.itsSize;
+    //for attack
+    if (aGame.itsCurrentPlayer->itsRole == ATTACK) {
+        if (aMove.itsEndPosition.itsRow-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType==SHIELD) {
+                if (aMove.itsEndPosition.itsRow-1 == 0 ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== SWORD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
+                    }
+                }
+            }
+        if (aMove.itsEndPosition.itsRow+1 <=SIZE) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType==SHIELD) {
+                if (aMove.itsEndPosition.itsRow + 1 == SIZE ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== SWORD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
+                    }
+                }
+            }
+        if (aMove.itsEndPosition.itsCol-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType==SHIELD) {
+                if (aMove.itsEndPosition.itsRow-1 == 0 ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== SWORD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType = NONE;
+                    }
+                }
+            }
+        if (aMove.itsEndPosition.itsCol-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType==SHIELD) {
+                if (aMove.itsEndPosition.itsRow+1 == SIZE ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== SWORD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== NONE){
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType = NONE;
+                    }
+                }
+            }
+    }
+    //for defense
+    if (aGame.itsCurrentPlayer->itsRole == DEFENSE) {
+        if (aMove.itsEndPosition.itsRow-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType==SWORD) {
+                if (aMove.itsEndPosition.itsRow-1 == 0 ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== SHIELD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol+2].itsPieceType== KING ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
+                    }
+                }
+            }
+        if (aMove.itsEndPosition.itsRow+1 <=SIZE) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType==SWORD) {
+                if (aMove.itsEndPosition.itsRow + 1 == SIZE ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== SHIELD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== KING ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
+                    }
+                }
+            }
+        if (aMove.itsEndPosition.itsCol-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType==SWORD) {
+                if (aMove.itsEndPosition.itsRow-1 == 0 ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== SHIELD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== KING ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType = NONE;
+                    }
+                }
+            }
+        if (aMove.itsEndPosition.itsCol-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType==SWORD) {
+                if (aMove.itsEndPosition.itsRow+1 == SIZE ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== SHIELD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== KING ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== NONE){
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType = NONE;
+                    }
+                }
+            }
+    }
 }
 
 
