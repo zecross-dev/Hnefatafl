@@ -738,7 +738,14 @@ void switchCurrentPlayer(Game& aGame) {
  * @return `true` if at least one SWORD exists, `false` if none remain.
  */
 bool isSwordLeft(const Board& aBoard) {
-    // TODO: Implement sword detection
+    const int SIZE = aBoard.itsSize;
+    for (int line = 0 ; line < SIZE ; line ++) {
+        for (int col = 0 ; col < SIZE ; col++) {
+            if (aBoard.itsCells[line][col].itsPieceType==SWORD) {
+                return true;
+            }
+        }
+    }
     return false;
 }
 
@@ -751,7 +758,14 @@ bool isSwordLeft(const Board& aBoard) {
  * @return Position of the king, or {-1, -1} if not found.
  */
 Position getKingPosition(const Board& aBoard) {
-    // TODO: Implement king position search
+    const int SIZE = aBoard.itsSize;
+    for (int line = 0 ; line < SIZE ; line ++) {
+        for (int col = 0 ; col < SIZE ; col++) {
+            if (aBoard.itsCells[line][col].itsPieceType==KING) {
+                return {line , col};
+            }
+        }
+    }
     return {-1, -1};
 }
 
