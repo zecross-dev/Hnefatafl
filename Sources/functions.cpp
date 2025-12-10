@@ -10,6 +10,7 @@
  * @date 10/11/2025
  */
 #include <charconv>
+#include <complex.h>
 #include <complex>
 #ifdef _WIN32
 #include <windows.h>
@@ -591,9 +592,9 @@ bool isValidMovement(const Game& aGame, const Move& aMove) {
  * @note Assumes move is valid. Use `isValidMovement()` first to validate.
  */
 void movePiece(Game& aGame, const Move& aMove) {
-    PieceType piece = aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType;
-    aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType = NONE;
-    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol].itsPieceType = piece;
+    PieceType piece = aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType; //stock a piece on variable
+    aGame.itsBoard.itsCells[aMove.itsStartPosition.itsRow][aMove.itsStartPosition.itsCol].itsPieceType = NONE; //set the 1st selected position piece as NONE
+    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol].itsPieceType = piece; //replace the 2nd selected position with stocked piece
 }
 /**
  * @brief Removes captured pieces from the board.
@@ -608,110 +609,52 @@ void movePiece(Game& aGame, const Move& aMove) {
  */
 void capturePieces(Game& aGame, const Move& aMove) {
     const int SIZE = aGame.itsBoard.itsSize;
-
+    const Position arroundCells[4] = {{0,-1},{0,1},{-1,0},{1,0}};
     //for defense
     if (aGame.itsCurrentPlayer->itsRole == DEFENSE) {
-        //test the 4 coordinates around the end moove position if the end moove positon is not on the bounds
-        //test if the moove is on the bounds lines
-        if (aMove.itsEndPosition.itsRow-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType==SWORD) {
-                if (aMove.itsEndPosition.itsRow-1 == 0 ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== SHIELD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol+2].itsPieceType== KING ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
+        //for each loop for test the 4 cells around the moove
+        for (Position arroundCell : arroundCells ) {
+            //test if the tested cell is in bounds
+            if ((aMove.itsEndPosition.itsRow + arroundCell.itsRow) >= 0 && aMove.itsEndPosition.itsRow + arroundCell.itsCol <SIZE &&
+                aMove.itsEndPosition.itsCol + arroundCell.itsCol >= 0 && aMove.itsEndPosition.itsCol + arroundCell.itsCol <SIZE){
+                //test if the tested cell contain a SWORD
+                if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +arroundCell.itsRow][aMove.itsEndPosition.itsCol +arroundCell.itsCol].itsPieceType==SWORD){
+                    //test all capture condition
+                    if (aMove.itsEndPosition.itsRow + arroundCell.itsRow == 0 || aMove.itsEndPosition.itsRow + arroundCell.itsCol == SIZE ||
+                        aMove.itsEndPosition.itsCol + arroundCell.itsCol == 0 || aMove.itsEndPosition.itsRow + arroundCell.itsCol == SIZE ||
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsPieceType== SHIELD ||
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsPieceType== KING ||
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsCellType == FORTRESS ||
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsCellType == CASTLE &&
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsPieceType== NONE) {
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +arroundCell.itsRow][aMove.itsEndPosition.itsCol +arroundCell.itsCol].itsPieceType = NONE;
                     }
                 }
             }
-        //repeat the tests for the 4 other coordinates
-        if (aMove.itsEndPosition.itsRow+1 <=SIZE) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType==SWORD) {
-                if (aMove.itsEndPosition.itsRow + 1 == SIZE ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== SHIELD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== KING ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
-                    }
-                }
-            }
-        if (aMove.itsEndPosition.itsCol-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType==SWORD) {
-                if (aMove.itsEndPosition.itsRow-1 == 0 ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== SHIELD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== KING ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType = NONE;
-                    }
-                }
-            }
-        if (aMove.itsEndPosition.itsCol-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType==SWORD) {
-                if (aMove.itsEndPosition.itsRow+1 == SIZE ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== SHIELD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== KING ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== NONE){
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType = NONE;
-                    }
-                }
-            }
+        }
     }
     //same tests adapted for attack
     if (aGame.itsCurrentPlayer->itsRole == ATTACK) {
-        if (aMove.itsEndPosition.itsRow-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType==SHIELD) {
-                if (aMove.itsEndPosition.itsRow-1 == 0 ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== SWORD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
+        for (Position arroundCell : arroundCells ) {
+            //test if the tested cell is in bounds
+            if ((aMove.itsEndPosition.itsRow + arroundCell.itsRow) >= 0 && aMove.itsEndPosition.itsRow + arroundCell.itsCol <SIZE &&
+                aMove.itsEndPosition.itsCol + arroundCell.itsCol >= 0 && aMove.itsEndPosition.itsCol + arroundCell.itsCol <SIZE){
+                //test if the tested cell contain a SHIELD
+                if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +arroundCell.itsRow][aMove.itsEndPosition.itsCol +arroundCell.itsCol].itsPieceType==SHIELD){
+                    //test all capture conditions
+                    if (aMove.itsEndPosition.itsRow + arroundCell.itsRow == 0 || aMove.itsEndPosition.itsRow + arroundCell.itsCol == SIZE ||
+                        aMove.itsEndPosition.itsCol + arroundCell.itsCol == 0 || aMove.itsEndPosition.itsRow + arroundCell.itsCol == SIZE ||
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsPieceType==SWORD ||
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsCellType == FORTRESS ||
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsCellType == CASTLE &&
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +2*arroundCell.itsRow][aMove.itsEndPosition.itsCol +2*arroundCell.itsCol].itsPieceType== NONE) {
+                        aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow +arroundCell.itsRow][aMove.itsEndPosition.itsCol +arroundCell.itsCol].itsPieceType = NONE;
                     }
                 }
             }
-        if (aMove.itsEndPosition.itsRow+1 <=SIZE) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType==SHIELD) {
-                if (aMove.itsEndPosition.itsRow + 1 == SIZE ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== SWORD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
-                    }
-                }
-            }
-        if (aMove.itsEndPosition.itsCol-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType==SHIELD) {
-                if (aMove.itsEndPosition.itsRow-1 == 0 ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== SWORD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType = NONE;
-                    }
-                }
-            }
-        if (aMove.itsEndPosition.itsCol-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType==SHIELD) {
-                if (aMove.itsEndPosition.itsRow+1 == SIZE ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== SWORD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== NONE){
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType = NONE;
-                    }
-                }
-            }
+        }
     }
 }
-
 
 /**
  * @brief Switches the active player.
@@ -832,6 +775,7 @@ bool isKingCapturedSimple(const Board& aBoard) {
     if (count == 4) {
         return true;
     }
+    return false;
 }
 
 /**
@@ -847,9 +791,74 @@ bool isKingCapturedSimple(const Board& aBoard) {
  * @return `true` if king completely blocked, `false` if escape route exists.
  * @note Advanced version for bonus points. Call with default params: `isKingCapturedRecursive(board)`.
  */
-bool isKingCapturedRecursive(const Board& aBoard, Position aKingPos, bool** isCellChecked) {
-
-    return false;
+bool isKingCapturedRecursive(const Board& aBoard, Position aKingPos , bool** isCellChecked) {
+    const int SIZE = aBoard.itsSize;
+    //set the end condition if this is the first function iteration
+    bool endCond = (isCellChecked == nullptr);
+    // find king position if not gived (base : {-1,-1})
+    if (aKingPos.itsCol == -1) {
+        aKingPos.itsCol = getKingPosition(aBoard).itsCol;
+        aKingPos.itsRow = getKingPosition(aBoard).itsRow;
+    }
+    // If pos = -1 (king not on the board) return false
+    if (aKingPos.itsCol == -1) {
+        return false;
+    }
+    // Allocate the tracking array
+    isCellChecked = new bool *[SIZE];
+    for (int line = 0 ; line < SIZE ; line++){
+        isCellChecked[line] = new bool[SIZE];
+        for (int col = 0; col < SIZE; col++) {
+            isCellChecked[line][col] = false;
+        }
+    }
+    // If the current cell is not a king or shield, it's not a valid escape route
+    if (aBoard.itsCells[aKingPos.itsRow][aKingPos.itsCol].itsPieceType != KING ||
+        aBoard.itsCells[aKingPos.itsRow][aKingPos.itsCol].itsPieceType != SHIELD) {
+        //stop all if is the first iteration
+        if (endCond) {
+            //delocate memory
+            for (int line = 0 ; line <SIZE ; line++) {
+                delete[] isCellChecked[line];
+            }
+            delete[] isCellChecked;
+        }
+        return false;
+    }
+    // valid the visited cell
+    isCellChecked[aKingPos.itsRow][aKingPos.itsRow] = true;
+    // Check neighboring cells in all 4 directions
+    Position checkArray[4] = {{0,-1},{0,1},{-1,0},{1,0}};
+    //use a for each loop for all position of the array
+    for (Position pos : checkArray) {
+        //test if position is already checked and if position is in the bounds
+        if (isValidPosition(pos,aBoard) && isCellChecked[pos.itsRow][pos.itsCol] == false ) {
+            //verify if this is not sword (for found a escape)
+            if (aBoard.itsCells[pos.itsRow][pos.itsCol].itsPieceType != SWORD &&
+                aBoard.itsCells[pos.itsRow][pos.itsCol].itsCellType != CASTLE &&
+                aBoard.itsCells[pos.itsRow][pos.itsCol].itsCellType != FORTRESS) {
+                //explore the path (recursive)
+                if(isKingCapturedRecursive(aBoard , pos , isCellChecked) == false) {
+                    if (endCond) {
+                        for (int line = 0 ; line <SIZE ; line++) {
+                            delete[] isCellChecked[line];
+                        }
+                        delete[] isCellChecked;
+                    }
+                    return false;
+                }
+            }
+        }
+    }
+    //if not escape found the king is captured
+    if (endCond) {
+        for (int line = 0 ; line <SIZE ; line++) {
+            delete[] isCellChecked[line];
+        }
+        delete[] isCellChecked;
+    }
+    //if the cell is sword (no return before) return true
+    return true;
 }
 
 /**
