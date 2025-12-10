@@ -608,7 +608,62 @@ void movePiece(Game& aGame, const Move& aMove) {
  */
 void capturePieces(Game& aGame, const Move& aMove) {
     const int SIZE = aGame.itsBoard.itsSize;
-    //for attack
+
+    //for defense
+    if (aGame.itsCurrentPlayer->itsRole == DEFENSE) {
+        //test the 4 coordinates around the end moove position if the end moove positon is not on the bounds
+        //test if the moove is on the bounds lines
+        if (aMove.itsEndPosition.itsRow-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType==SWORD) {
+                if (aMove.itsEndPosition.itsRow-1 == 0 ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== SHIELD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol+2].itsPieceType== KING ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
+                    }
+                }
+            }
+        //repeat the tests for the 4 other coordinates
+        if (aMove.itsEndPosition.itsRow+1 <=SIZE) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType==SWORD) {
+                if (aMove.itsEndPosition.itsRow + 1 == SIZE ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== SHIELD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== KING ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
+                    }
+                }
+            }
+        if (aMove.itsEndPosition.itsCol-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType==SWORD) {
+                if (aMove.itsEndPosition.itsRow-1 == 0 ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== SHIELD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== KING ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== NONE) {
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType = NONE;
+                    }
+                }
+            }
+        if (aMove.itsEndPosition.itsCol-1 >=0) {
+            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType==SWORD) {
+                if (aMove.itsEndPosition.itsRow+1 == SIZE ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== SHIELD ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== KING ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == FORTRESS ||
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == CASTLE &&
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== NONE){
+                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType = NONE;
+                    }
+                }
+            }
+    }
+    //same tests adapted for attack
     if (aGame.itsCurrentPlayer->itsRole == ATTACK) {
         if (aMove.itsEndPosition.itsRow-1 >=0) {
             if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType==SHIELD) {
@@ -647,57 +702,6 @@ void capturePieces(Game& aGame, const Move& aMove) {
             if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType==SHIELD) {
                 if (aMove.itsEndPosition.itsRow+1 == SIZE ||
                     aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== SWORD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== NONE){
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType = NONE;
-                    }
-                }
-            }
-    }
-    //for defense
-    if (aGame.itsCurrentPlayer->itsRole == DEFENSE) {
-        if (aMove.itsEndPosition.itsRow-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType==SWORD) {
-                if (aMove.itsEndPosition.itsRow-1 == 0 ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== SHIELD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol+2].itsPieceType== KING ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow-1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
-                    }
-                }
-            }
-        if (aMove.itsEndPosition.itsRow+1 <=SIZE) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType==SWORD) {
-                if (aMove.itsEndPosition.itsRow + 1 == SIZE ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== SHIELD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== KING ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+2][aMove.itsEndPosition.itsCol].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow+1][aMove.itsEndPosition.itsCol].itsPieceType = NONE;
-                    }
-                }
-            }
-        if (aMove.itsEndPosition.itsCol-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType==SWORD) {
-                if (aMove.itsEndPosition.itsRow-1 == 0 ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== SHIELD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== KING ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == FORTRESS ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsCellType == CASTLE &&
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-2].itsPieceType== NONE) {
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol-1].itsPieceType = NONE;
-                    }
-                }
-            }
-        if (aMove.itsEndPosition.itsCol-1 >=0) {
-            if (aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+1].itsPieceType==SWORD) {
-                if (aMove.itsEndPosition.itsRow+1 == SIZE ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== SHIELD ||
-                    aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== KING ||
                     aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == FORTRESS ||
                     aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsCellType == CASTLE &&
                     aGame.itsBoard.itsCells[aMove.itsEndPosition.itsRow][aMove.itsEndPosition.itsCol+2].itsPieceType== NONE){
@@ -778,7 +782,13 @@ Position getKingPosition(const Board& aBoard) {
  * @return `true` if king is on a FORTRESS cell, `false` otherwise.
  */
 bool isKingEscaped(const Board& aBoard) {
-    // TODO: Implement king escape check
+    Position kingCoords = getKingPosition(aBoard);
+    if (kingCoords.itsRow == -1) {
+        return false;
+    }
+    if (aBoard.itsCells[kingCoords.itsRow][kingCoords.itsCol].itsCellType == FORTRESS) {
+        return true;
+    }
     return false;
 }
 
@@ -793,8 +803,35 @@ bool isKingEscaped(const Board& aBoard) {
  * @note Simpler version for students. Checks only immediate neighbors.
  */
 bool isKingCapturedSimple(const Board& aBoard) {
-    // TODO: Implement simple king capture check (4 directions)
-    return false;
+    const int SIZE =aBoard.itsSize;
+    Position kingPos = getKingPosition(aBoard) ;
+    if (kingPos.itsRow == -1) {
+        return false;
+    }
+    //List of 4 point arround the king
+    Position kingArounds[4] = {
+            {kingPos.itsRow, kingPos.itsCol+1},
+            {kingPos.itsRow, kingPos.itsCol-1},
+            {kingPos.itsRow+1, kingPos.itsCol},
+            {kingPos.itsRow-1, kingPos.itsCol}
+    };
+    int count = 0;
+    for (auto& cardPoint : kingArounds) {
+        if (cardPoint.itsCol < 0 || cardPoint.itsCol >= SIZE || cardPoint.itsRow < 0 || cardPoint.itsRow >=SIZE ) {
+            count++;
+        }
+        else if (aBoard.itsCells[cardPoint.itsRow][cardPoint.itsCol].itsPieceType==SWORD ||
+            aBoard.itsCells[cardPoint.itsRow][cardPoint.itsCol].itsCellType == CASTLE ||
+            aBoard.itsCells[cardPoint.itsRow][cardPoint.itsCol].itsCellType == FORTRESS) {
+            count++;
+        }
+        else {
+            return false;
+        }
+    }
+    if (count == 4) {
+        return true;
+    }
 }
 
 /**
@@ -811,7 +848,7 @@ bool isKingCapturedSimple(const Board& aBoard) {
  * @note Advanced version for bonus points. Call with default params: `isKingCapturedRecursive(board)`.
  */
 bool isKingCapturedRecursive(const Board& aBoard, Position aKingPos, bool** isCellChecked) {
-    // TODO: Implement recursive king capture check with escape detection
+
     return false;
 }
 
@@ -825,7 +862,9 @@ bool isKingCapturedRecursive(const Board& aBoard, Position aKingPos, bool** isCe
  */
 bool isGameFinished(const Game& aGame)
 {
-    // TODO: Implement game end detection
+    if (isKingCapturedSimple(aGame.itsBoard) == true || isKingEscaped(aGame.itsBoard) == true || isSwordLeft(aGame.itsBoard) == false) {
+        return true;
+    }
     return false;
 }
 
@@ -843,6 +882,14 @@ bool isGameFinished(const Game& aGame)
  */
 const Player* whoWon(const Game& aGame)
 {
-    // TODO: Implement winner determination
+    if (isKingCapturedSimple(aGame.itsBoard) == true) {
+        return &aGame.itsPlayer1;
+    }
+    if (isSwordLeft(aGame.itsBoard) == false) {
+        return &aGame.itsPlayer2;
+    }
+    if (isKingEscaped(aGame.itsBoard) == true) {
+        return &aGame.itsPlayer2;
+    }
     return nullptr;
 }
