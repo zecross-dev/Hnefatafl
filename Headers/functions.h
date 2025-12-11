@@ -283,4 +283,73 @@ bool isGameFinished(const Game& aGame);
  */
 const Player* whoWon(const Game& aGame);
 
+
+// ============================================================================
+// SECTION 6: SAVE GESTION
+// ============================================================================
+
+/**
+ * @brief create save of game when game is starting.
+ *
+ * Create a new file of save with selected name
+ *  -if name is already used : overwrite suggestion
+ *  -if maximum number of save (5) is reached : overwrite suggestion (on selected save)
+ *  -if you choose to not overwrite a save , the game will not be able to save and return false.
+ *
+ *@note all save files will be stocked on the folder /save
+ *
+ * @param saveName pointer on the name of the save
+ *
+ * @return if save is successfully created
+ */
+bool createSave (string &saveName);
+
+/**
+ * @brief update the save of the game with the current game state on the save file.
+ *  -if file is not found , a new file with the filename is created
+ *
+ * @param aGame the current game state.
+ * @param saveName the name of the save
+ */
+void updateSave(const Game& aGame , string saveName);
+
+/**
+ * @brief delete a selected save.
+ *  -if save name does not exist : return false and do nothing
+ *  -delete only saves in the folder /Save
+ *  -if 2 saves have a same name : select one of them (number between 1 & 5)
+ *
+ * @param saveName Name of the save to delete
+ *
+ * @return  if the deletion was successfully carried out
+ */
+bool deleteSave(string& saveName);
+
+
+/**
+ * @brief display a save selection menu
+ *  -display 5 line for the 5 saves
+ *  -if a save don't exist : display free space
+ *  -else display the save name
+ *  -display the actions possible :
+ *      -Load a save 1
+ *      -Delete a save 2
+ *      -Exit save manager 3
+ */
+void displaySaveSelection();
+
+/**
+ * @brief Load a selected save for continue to play it
+ *  -if no save in folder /Save display an error message (No save to load) and return false
+ *  -check if lines contains the goods information (currentPlayer, boardSize , Board )
+ *  -if information are incorrect :
+ *      -size != 11 or 13
+ *      -currentPlayer != itsPlayer1 or itsPlayer2
+ *      -if board is missing or invalid (example 2 kings on the board)
+ * @param saveName name of the save
+ *
+ * @return if save was successfully loaded
+ */
+bool loadSave(string saveName);
+
 #endif // FUNCTIONS_H

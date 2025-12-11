@@ -24,28 +24,34 @@ using namespace std;
  */
 void playGame()
 {
-    displayHnefataflLogo();
-    //size initialisation
-    BoardSize gameBoardSize;
-    //board initialisation
-    Board gameBoard;
-    bool validationSize = false;
-    //Select valid size
-    while ( validationSize == false ) {
-         validationSize=chooseSizeBoard(gameBoardSize);
+    Game game;
+    chooseSizeBoard(game.itsBoard.itsSize);
+    createBoard(game.itsBoard);
+    initializeBoard(game.itsBoard);
+    cout <<"Select name for player 1 :  ";
+    cin >> game.itsPlayer1.itsName;
+    cout <<"Select name for player 2 :  ";
+    cin >> game.itsPlayer2.itsName;
+    while (!isGameFinished(game)) {
+        clearConsole();
+        displayHnefataflLogo();
+        displayBoard(game.itsBoard);
+        Position pos1{-1,-1},pos2{-1,-1};
+        Move turnMove{pos1,pos2} ;
+        while (!isValidMovement(game,turnMove)){
+            cout << "position 1 , ";
+            getPositionFromInput(pos1 , game.itsBoard);
+            cout << "position 2 , ";
+            getPositionFromInput(pos2 , game.itsBoard);
+            turnMove={pos1,pos2};
+        }
+        movePiece(game,turnMove);
+        capturePieces(game,turnMove);
+        switchCurrentPlayer(game);
     }
-    gameBoard.itsSize = gameBoardSize;
-    bool validBoard;
-    do {
-        validBoard = createBoard(gameBoard);
-    }while (validBoard != true);
 
-    clearConsole();
-    displayHnefataflLogo();
-    initializeBoard(gameBoard);
-    displayBoard(gameBoard);
-    Position pos;
-    getPositionFromInput(pos ,gameBoard);
+
+
     // Hint: Create a Game structure, configure terminal, get players, create board,
     // run game loop until finished, display winner, and clean up memory
 }
@@ -116,7 +122,7 @@ void launchTests(){
  */
 int main() {
     // Uncomment the line below to run tests
-    launchTests();
+    //launchTests();
     // Start the game
     playGame();
 
