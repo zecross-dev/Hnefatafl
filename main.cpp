@@ -25,35 +25,56 @@ using namespace std;
 void playGame()
 {
     Game game;
-    chooseSizeBoard(game.itsBoard.itsSize);
-    createBoard(game.itsBoard);
-    initializeBoard(game.itsBoard);
-    cout <<"Select name for player 1 :  ";
-    cin >> game.itsPlayer1.itsName;
-    cout <<"Select name for player 2 :  ";
-    cin >> game.itsPlayer2.itsName;
+    string saveName ="";
+    bool loaded = saveManager(game , saveName);
+    if (!loaded) {
+        chooseSizeBoard(game.itsBoard.itsSize);
+        createBoard(game.itsBoard);
+        initializeBoard(game.itsBoard);
+        cout <<"Select name for player 1 :  ";
+        cin >> game.itsPlayer1.itsName;
+        cout <<"Select name for player 2 :  ";
+        cin >> game.itsPlayer2.itsName;
+    }
+    cout << "Do you want to save this game (y/n)";
+    string saveValidation;
+    cin >> saveValidation;
+    bool validSave = false;
+    if (saveValidation== "y" || saveValidation == "Y") {
+        validSave = createSave(saveName);
+    }
     while (!isGameFinished(game)) {
         clearConsole();
         displayHnefataflLogo();
+        string playerRole;
+        if (game.itsCurrentPlayer->itsRole == 1) {
+            playerRole = "DEFENSE";
+        }
+        else {
+            playerRole = "ATTACK";
+        }
+        cout << "Turn to : " << playerRole << " (" << game.itsCurrentPlayer->itsName << ")" <<endl;
         displayBoard(game.itsBoard);
         Position pos1{-1,-1},pos2{-1,-1};
         Move turnMove{pos1,pos2} ;
-        while (!isValidMovement(game,turnMove)){
+        bool validMove;
+        do {
             cout << "position 1 , ";
             getPositionFromInput(pos1 , game.itsBoard);
             cout << "position 2 , ";
             getPositionFromInput(pos2 , game.itsBoard);
             turnMove={pos1,pos2};
-        }
+            validMove = isValidMovement(game,turnMove);
+        }while (!validMove);
         movePiece(game,turnMove);
         capturePieces(game,turnMove);
         switchCurrentPlayer(game);
+        if (validSave == true) {
+            updateSave(game,saveName);
+        }
     }
+    deleteBoard(game.itsBoard);
 
-
-
-    // Hint: Create a Game structure, configure terminal, get players, create board,
-    // run game loop until finished, display winner, and clean up memory
 }
 
 

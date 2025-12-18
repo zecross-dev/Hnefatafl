@@ -311,7 +311,7 @@ bool createSave (string &saveName);
  * @param aGame the current game state.
  * @param saveName the name of the save
  */
-void updateSave(const Game& aGame , string saveName);
+void updateSave(const Game& aGame , string& saveName);
 
 /**
  * @brief delete a selected save.
@@ -336,7 +336,7 @@ bool deleteSave(string& saveName);
  *      -Delete a save 2
  *      -Exit save manager 3
  */
-void displaySaveSelection();
+bool saveManager(Game &aGame , string &saveName);
 
 /**
  * @brief Load a selected save for continue to play it
@@ -350,6 +350,6 @@ void displaySaveSelection();
  *
  * @return if save was successfully loaded
  */
-bool loadSave(string saveName);
+bool loadSave(Game &aGame, string& saveName);
 
 #endif // FUNCTIONS_H
