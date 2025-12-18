@@ -45,7 +45,7 @@
  * You can also toggle DISPLAY_BOARDS or DISPLAY_PROMPTS for visual inspection.
  * ====================================================================================
  *
- * @author JMB - IUT Informatique La Rochelle
+ * @author JMB and zecross-dev - IUT Informatique La Rochelle
  * @date 10/11/2025
  */
 

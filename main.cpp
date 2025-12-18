@@ -6,7 +6,7 @@
  * This file contains the implementation of the Hnefatafl game, including setup, gameplay, and outcome determination.
  * It also provides a testing suite for various game functions.
  *
- * @author JMB and zecross-dev- IUT Informatique La Rochelle
+ * @author JMB and zecross-dev IUT Informatique La Rochelle
  * @date 10/11/2025
  */
 

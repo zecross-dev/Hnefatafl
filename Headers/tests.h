@@ -15,7 +15,7 @@
  * Overall, 'test.cpp' plays a crucial role in maintaining code quality and robustness by confirming
  * that the functions it tests meet their intended specifications.
  *
- * @author JMB - IUT Informatique La Rochelle
+ * @author JMB and zecross-dev - IUT Informatique La Rochelle
  * @date 10/11/2025
  */
 

@@ -6,7 +6,7 @@
  * This file contains the declarations of various functions used in the Hnefatafl game, including
  * board initialization, display, piece movement, capturing, and game state checks.
  *
- * @author JMB - IUT Informatique La Rochelle
+ * @author JMB and zecross-dev - IUT Informatique La Rochelle
  * @date 10/11/2025
  */
 
